@@ -1,5 +1,7 @@
 # One Page is all you need
 
+*An [ASCII Koi](https://github.com/pursurer/ascii-koi) app: the koi pond, every morning, with the five things that matter today.*
+
 **Every morning at 08:00, an n8n agent reads my seven sources and writes me one page.** Classes, inbox, AI news, a stock watchlist, deal prices and Christmas fares go in. Out comes a single page with the five things that matter today, each one traced back to where it came from. The page opens in a pond of ASCII koi, and a little black cat plays with the numbers.
 
 <p align="center">
@@ -86,15 +88,13 @@ You need Docker, Python 3, and your own accounts for the sources you want. A sou
 <!-- family:start -->
 ## The ASCII Koi family
 
-Small things that share one look: koi drawn in text characters, letters that take a koi's colours as it swims under them, a black cat in character tiles, and black water (`#0d1315` water, `#ebe6dc` ink, `#e8784f` accent).
+One design, and the two places it lives. Koi drawn in text characters, letters that take a koi's colours as it swims under them, a black cat in character tiles, and black water (`#0d1315` water, `#ebe6dc` ink, `#e8784f` accent).
 
 | Project | What it is |
 |---|---|
-| [ASCII Koi](https://github.com/pursurer/ascii-koi) | The pond itself: your new tab, under a clock made of the same characters. Its `pond.js` is the engine the others reuse |
-| [Codex Koi](https://github.com/pursurer/codex-koi) | The pond behind the Codex desktop app's new-chat page |
-| [Claude Koi](https://github.com/pursurer/claude-koi) | The pond in a pane beside Claude Code, opened with `/koi` |
-| [Codex ASCII Pets](https://github.com/pursurer/codex-ascii-pets) | The koi and the black cat as Codex pets |
-| **One Page is all you need** (this repository) | Where the koi and the cat began: a one-page morning briefing that an n8n agent writes every day |
+| [ASCII Koi](https://github.com/pursurer/ascii-koi) | **The design.** The pond itself: your new tab, under a clock made of the same characters. Its `pond.js` is the engine both apps run, byte for byte |
+| [Codex Koi](https://github.com/pursurer/codex-koi) | **In Codex.** The pond behind the Codex desktop app's new-chat page, and the black cat as your Codex pet |
+| **One Page is all you need** (this repository) | **In your morning.** A one-page briefing that an n8n agent writes every day, opening on the pond. Where the koi and the cat began |
 
 Every repository in the family has the topic [`ascii-koi`](https://github.com/topics/ascii-koi).
 <!-- family:end -->
