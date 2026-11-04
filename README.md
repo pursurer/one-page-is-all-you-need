@@ -91,7 +91,7 @@ Small things that share one look: koi drawn in text characters, letters that tak
 | Project | What it is |
 |---|---|
 | [ASCII Koi](https://github.com/pursurer/ascii-koi) | The pond itself: your new tab, under a clock made of the same characters. Its `pond.js` is the engine the others reuse |
-| Codex Koi (coming soon) | The pond behind the Codex desktop app's new-chat page |
+| [Codex Koi](https://github.com/pursurer/codex-koi) | The pond behind the Codex desktop app's new-chat page |
 | [Claude Koi](https://github.com/pursurer/claude-koi) | The pond in a pane beside Claude Code, opened with `/koi` |
 | [Codex ASCII Pets](https://github.com/pursurer/codex-ascii-pets) | The koi and the black cat as Codex pets |
 | **One Page is all you need** (this repository) | Where the koi and the cat began: a one-page morning briefing that an n8n agent writes every day |
