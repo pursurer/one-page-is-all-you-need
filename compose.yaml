@@ -1,0 +1,20 @@
+# n8n for One Page is all you need. Start it from this folder: docker compose up -d
+# n8n's file nodes may only read ~/.n8n-files, so the page folder is mounted there, read-only.
+name: one-page
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.43.8
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      TZ: Europe/Paris
+      GENERIC_TIMEZONE: Europe/Paris
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./page:/home/node/.n8n-files/page:ro
+
+volumes:
+  n8n_data:

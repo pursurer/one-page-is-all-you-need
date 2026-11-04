@@ -1,0 +1,261 @@
+{
+  "id": "DailyPageSetupT1",
+  "name": "Daily Page · 0 Setup test tables",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris",
+    "saveManualExecutions": true
+  },
+  "nodes": [
+    {
+      "id": "4639978d-cec1-563b-b303-326bbb4993be",
+      "name": "GET /daily-page-setup-test",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "daily-page-setup-test",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "0d79cffa-113e-5082-8c38-56177e631512"
+    },
+    {
+      "id": "ccfa05c2-54fd-5c20-8ba6-871d34ccbb17",
+      "name": "Create table t1_ed",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "t1_ed",
+        "columns": {
+          "column": [
+            {
+              "name": "date",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "number"
+            },
+            {
+              "name": "updated_at",
+              "type": "string"
+            },
+            {
+              "name": "edition",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    },
+    {
+      "id": "c2fe0b72-2b26-584d-9e15-8c1eb72fa6ae",
+      "name": "Create table t1_sc",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "t1_sc",
+        "columns": {
+          "column": [
+            {
+              "name": "source",
+              "type": "string"
+            },
+            {
+              "name": "fetched_at",
+              "type": "string"
+            },
+            {
+              "name": "payload",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    },
+    {
+      "id": "e5726daf-4153-578c-ae4e-e48b68ee58b4",
+      "name": "Create table t1_cf",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "t1_cf",
+        "columns": {
+          "column": [
+            {
+              "name": "key",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    },
+    {
+      "id": "b92728fb-dd7b-58dc-bf90-969f8edaca4c",
+      "name": "Create table t1_ph",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "t1_ph",
+        "columns": {
+          "column": [
+            {
+              "name": "item",
+              "type": "string"
+            },
+            {
+              "name": "day",
+              "type": "string"
+            },
+            {
+              "name": "price",
+              "type": "number"
+            },
+            {
+              "name": "source",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    },
+    {
+      "id": "fc345ef0-7bc3-5149-a387-6d1c9c7ca8cd",
+      "name": "Create table t1_tt",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "t1_tt",
+        "columns": {
+          "column": [
+            {
+              "name": "day",
+              "type": "string"
+            },
+            {
+              "name": "classes",
+              "type": "string"
+            },
+            {
+              "name": "fetched_at",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "GET /daily-page-setup-test": {
+      "main": [
+        [
+          {
+            "node": "Create table t1_ed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create table t1_ed": {
+      "main": [
+        [
+          {
+            "node": "Create table t1_sc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create table t1_sc": {
+      "main": [
+        [
+          {
+            "node": "Create table t1_cf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create table t1_cf": {
+      "main": [
+        [
+          {
+            "node": "Create table t1_ph",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create table t1_ph": {
+      "main": [
+        [
+          {
+            "node": "Create table t1_tt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

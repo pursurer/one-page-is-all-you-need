@@ -1,0 +1,478 @@
+{
+  "id": "DailyPageServeT1",
+  "name": "Daily Page · test page (test tables)",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris",
+    "saveManualExecutions": true
+  },
+  "nodes": [
+    {
+      "id": "5061be16-a9df-504a-ab00-b70ecfca4ae6",
+      "name": "GET /today-test",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "today-test",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "notes": "The page you open every morning: http://localhost:5678/webhook/today-test",
+      "webhookId": "bfb2f8ad-4885-50ea-ba8f-bbd718d1c561"
+    },
+    {
+      "id": "08785ac0-d99a-50bf-bfad-09e7d018f0fb",
+      "name": "Load latest edition",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_T1_ED_TABLE_ID",
+          "cachedResultName": "t1_ed"
+        },
+        "returnAll": false,
+        "limit": 1,
+        "orderBy": true,
+        "orderByColumn": "date",
+        "orderByDirection": "DESC"
+      },
+      "alwaysOutputData": true,
+      "notes": "Newest row first. If today's run has not happened yet, this is yesterday's edition."
+    },
+    {
+      "id": "f8341ead-de02-5c5c-8360-8a04dbfd095d",
+      "name": "Today's edition missing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.date !== $now.setZone('Europe/Paris').toFormat('yyyy-MM-dd') && $now.setZone('Europe/Paris').hour * 60 + $now.setZone('Europe/Paris').minute >= 485 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "executeOnce": true,
+      "notes": "After 08:05 with no edition for today: the 08:00 run was missed."
+    },
+    {
+      "id": "76116966-23e8-50a5-b2c8-c0872a994e25",
+      "name": "Load last page build",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        -160
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_T1_CF_TABLE_ID",
+          "cachedResultName": "t1_cf"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "page_build_started_at"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "eb77ae8c-344e-5c56-9390-2e1ba7aff07d",
+      "name": "Tried in the last 10 min?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        -160
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ !!$json.value && ($now.toMillis() - DateTime.fromISO($json.value).toMillis()) < 600000 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "executeOnce": true,
+      "notes": "A failed build is not retried on every open: at most once per 10 minutes."
+    },
+    {
+      "id": "f6423458-4814-5d83-a234-bb3cceb73521",
+      "name": "Note this build attempt",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        -320
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_T1_CF_TABLE_ID",
+          "cachedResultName": "t1_cf"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "page_build_started_at"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "page_build_started_at",
+            "value": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "26369649-3997-5202-8ce7-6cd16e53d1f7",
+      "name": "Build today's edition now",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        -320
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5678/webhook/rebuild-test?reason=page-open",
+        "options": {
+          "timeout": 150000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "notes": "Runs the build workflow and waits for it (about 15 to 35 seconds). If it fails, the last edition is shown."
+    },
+    {
+      "id": "548c220a-068c-5aad-b48c-0ebb7e029f26",
+      "name": "Load latest edition (after build)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1540,
+        -320
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_T1_ED_TABLE_ID",
+          "cachedResultName": "t1_ed"
+        },
+        "returnAll": false,
+        "limit": 1,
+        "orderBy": true,
+        "orderByColumn": "date",
+        "orderByDirection": "DESC"
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "4581ad14-3f6c-5b22-b88c-5229af5be539",
+      "name": "Read page template",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        1760,
+        0
+      ],
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "/home/node/.n8n-files/page/template.html",
+        "options": {
+          "dataPropertyName": "template"
+        }
+      },
+      "executeOnce": true,
+      "onError": "continueErrorOutput",
+      "notes": "The design lives in a file, so the page can change without re-importing this workflow."
+    },
+    {
+      "id": "5d206ca7-2fc5-54b4-9685-4df2a0913a13",
+      "name": "Inject EDITION into page",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        -80
+      ],
+      "parameters": {
+        "jsCode": "// Put the latest edition into the page template between the EDITION markers.\n// Built from parts: n8n treats a slash-star sequence in Code as a comment, even inside a string.\nconst BEGIN = '/' + '*EDITION:BEGIN*' + '/';\nconst END = '/' + '*EDITION:END*' + '/';\n\nconst template = (await this.helpers.getBinaryDataBuffer(0, 'template')).toString('utf8');\n// After a page-open build, read the row that build just saved.\nconst row = $('Load latest edition (after build)').isExecuted\n  ? $('Load latest edition (after build)').first().json\n  : $('Load latest edition').first().json;\nconst today = $now.setZone('Europe/Paris').toFormat('yyyy-MM-dd');\n\nlet edition = null;\nif (row && row.edition) {\n  edition = JSON.parse(row.edition);\n  edition.version = row.version;\n  // Opened before today's run: show the last edition, and say so.\n  edition.staleEdition = row.date !== today;\n}\n\n// Data comes from outside sources. Escape \"<\" so a closing script tag in a title cannot end\n// the page script, and escape the two Unicode line separators that break a script literal.\nconst LS = String.fromCharCode(0x2028);\nconst PS = String.fromCharCode(0x2029);\nconst json = JSON.stringify(edition)\n  .split('<').join('\\\\u003c')\n  .split(LS).join('\\\\u2028')\n  .split(PS).join('\\\\u2029');\n\nconst a = template.indexOf(BEGIN);\nconst b = template.indexOf(END);\nif (a < 0 || b < a) {\n  throw new Error('The page template has no EDITION:BEGIN ... EDITION:END markers');\n}\nconst html = template.slice(0, a + BEGIN.length) + json + template.slice(b);\nreturn [{ json: { html } }];\n"
+      }
+    },
+    {
+      "id": "76c112d9-4c12-55a2-a624-33aff05ebc7f",
+      "name": "Return page",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2200,
+        -80
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "content-type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "4fa8d75e-7d63-5faa-8d84-9c5e8c147558",
+      "name": "Template missing",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1980,
+        120
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<p>The page template is missing: /home/node/.n8n-files/page/template.html</p>",
+        "options": {
+          "responseCode": 500,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "content-type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "GET /today-test": {
+      "main": [
+        [
+          {
+            "node": "Load latest edition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load latest edition": {
+      "main": [
+        [
+          {
+            "node": "Today's edition missing?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Today's edition missing?": {
+      "main": [
+        [
+          {
+            "node": "Load last page build",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read page template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load last page build": {
+      "main": [
+        [
+          {
+            "node": "Tried in the last 10 min?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tried in the last 10 min?": {
+      "main": [
+        [
+          {
+            "node": "Read page template",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Note this build attempt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Note this build attempt": {
+      "main": [
+        [
+          {
+            "node": "Build today's edition now",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build today's edition now": {
+      "main": [
+        [
+          {
+            "node": "Load latest edition (after build)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load latest edition (after build)": {
+      "main": [
+        [
+          {
+            "node": "Read page template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read page template": {
+      "main": [
+        [
+          {
+            "node": "Inject EDITION into page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Template missing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inject EDITION into page": {
+      "main": [
+        [
+          {
+            "node": "Return page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

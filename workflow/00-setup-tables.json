@@ -1,0 +1,269 @@
+{
+  "id": "DailyPageSetup01",
+  "name": "Daily Page · 0 Setup tables",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris"
+  },
+  "nodes": [
+    {
+      "id": "d0a10000-0000-4000-8000-000000000001",
+      "name": "Run setup (GET /daily-page-setup)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "6b1f2c3e-0a1d-4c5e-9f00-000000000001",
+      "notes": "Creates the four Data Tables once. Safe to call again: existing tables are reused.",
+      "parameters": {
+        "path": "daily-page-setup",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "d0a10000-0000-4000-8000-000000000002",
+      "name": "Create table editions",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        0
+      ],
+      "notes": "One row per day. Rebuilds update the same row (upsert by date).",
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "editions",
+        "columns": {
+          "column": [
+            {
+              "name": "date",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "number"
+            },
+            {
+              "name": "updated_at",
+              "type": "string"
+            },
+            {
+              "name": "edition",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    },
+    {
+      "id": "d0a10000-0000-4000-8000-000000000003",
+      "name": "Create table source_cache",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        0
+      ],
+      "executeOnce": true,
+      "notes": "Last good payload per source. Used when a source fails.",
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "source_cache",
+        "columns": {
+          "column": [
+            {
+              "name": "source",
+              "type": "string"
+            },
+            {
+              "name": "fetched_at",
+              "type": "string"
+            },
+            {
+              "name": "payload",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    },
+    {
+      "id": "d0a10000-0000-4000-8000-000000000004",
+      "name": "Create table config",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        0
+      ],
+      "executeOnce": true,
+      "notes": "Private settings, for example the Zeus ICS link. Filled in by the user.",
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "config",
+        "columns": {
+          "column": [
+            {
+              "name": "key",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    },
+    {
+      "id": "d0a10000-0000-4000-8000-000000000005",
+      "name": "Create table price_history",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        0
+      ],
+      "executeOnce": true,
+      "notes": "One price per item per day, for get_price_history.",
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "price_history",
+        "columns": {
+          "column": [
+            {
+              "name": "item",
+              "type": "string"
+            },
+            {
+              "name": "day",
+              "type": "string"
+            },
+            {
+              "name": "price",
+              "type": "number"
+            },
+            {
+              "name": "source",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    },
+    {
+      "id": "d8d0a14c-ec95-5678-869f-bccd66ccfbbf",
+      "name": "Create table timetable",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        0
+      ],
+      "executeOnce": true,
+      "notes": "One price per item per day, for get_price_history.",
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "timetable",
+        "columns": {
+          "column": [
+            {
+              "name": "day",
+              "type": "string"
+            },
+            {
+              "name": "classes",
+              "type": "string"
+            },
+            {
+              "name": "fetched_at",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run setup (GET /daily-page-setup)": {
+      "main": [
+        [
+          {
+            "node": "Create table editions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create table editions": {
+      "main": [
+        [
+          {
+            "node": "Create table source_cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create table source_cache": {
+      "main": [
+        [
+          {
+            "node": "Create table config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create table config": {
+      "main": [
+        [
+          {
+            "node": "Create table price_history",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create table price_history": {
+      "main": [
+        [
+          {
+            "node": "Create table timetable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

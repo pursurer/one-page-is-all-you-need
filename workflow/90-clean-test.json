@@ -1,0 +1,247 @@
+{
+  "id": "DailyPageCleanT1",
+  "name": "Daily Page · test cleanup (test tables only)",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris",
+    "saveManualExecutions": true
+  },
+  "nodes": [
+    {
+      "id": "06ac04b6-ed41-5add-888f-b2cef14d49e5",
+      "name": "GET /daily-page-clean-test",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "daily-page-clean-test",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "80938f15-e933-548e-98da-6ab38c59a2eb"
+    },
+    {
+      "id": "6bb131a0-3310-5459-a38b-a43f3ec2ceeb",
+      "name": "Empty t1_ed",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_T1_ED_TABLE_ID",
+          "cachedResultName": "t1_ed"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "date",
+              "condition": "isNotEmpty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "c475c686-52b2-5f9f-a999-3df8706a75f0",
+      "name": "Empty t1_sc",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_T1_SC_TABLE_ID",
+          "cachedResultName": "t1_sc"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "source",
+              "condition": "isNotEmpty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "aecb7518-3544-53b9-86b3-fc27ef292df5",
+      "name": "Empty t1_cf",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_T1_CF_TABLE_ID",
+          "cachedResultName": "t1_cf"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "isNotEmpty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "e71f6a47-ff30-518f-b3fb-c3f0133c7492",
+      "name": "Empty t1_ph",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_T1_PH_TABLE_ID",
+          "cachedResultName": "t1_ph"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "item",
+              "condition": "isNotEmpty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "4ac22365-d657-5805-944c-b5730db43a5e",
+      "name": "Empty t1_tt",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_T1_TT_TABLE_ID",
+          "cachedResultName": "t1_tt"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "day",
+              "condition": "isNotEmpty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    }
+  ],
+  "connections": {
+    "GET /daily-page-clean-test": {
+      "main": [
+        [
+          {
+            "node": "Empty t1_ed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Empty t1_ed": {
+      "main": [
+        [
+          {
+            "node": "Empty t1_sc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Empty t1_sc": {
+      "main": [
+        [
+          {
+            "node": "Empty t1_cf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Empty t1_cf": {
+      "main": [
+        [
+          {
+            "node": "Empty t1_ph",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Empty t1_ph": {
+      "main": [
+        [
+          {
+            "node": "Empty t1_tt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

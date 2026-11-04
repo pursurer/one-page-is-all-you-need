@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Today</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; font: 15px/1.6 -apple-system, "Helvetica Neue", sans-serif; }
+    #down { max-width: 30em; padding: 0 16px; }
+    #down h1 { font-size: 18px; margin: 0 0 8px; }
+    code { font-family: ui-monospace, Menlo, monospace; }
+  </style>
+</head>
+<body>
+  <div id="down" hidden>
+    <h1>n8n 没有在运行</h1>
+    <p>今天的页面由本机的 n8n 生成。打开 Docker Desktop，等 n8n 启动后，再开一个新标签页。</p>
+    <p><a href="http://127.0.0.1:5678/webhook/today">直接打开页面</a></p>
+  </div>
+  <script src="newtab.js"></script>
+</body>
+</html>

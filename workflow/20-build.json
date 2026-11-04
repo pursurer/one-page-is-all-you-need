@@ -1,0 +1,2964 @@
+{
+  "id": "DailyPageBuild01",
+  "name": "Daily Page · 1 Build edition",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris",
+    "saveManualExecutions": true
+  },
+  "nodes": [
+    {
+      "id": "e0a59536-4889-5198-9f7b-8d4635196341",
+      "name": "1 Trigger",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -260
+      ],
+      "parameters": {
+        "content": "## 1 Trigger\n08:00 every day, or the Rebuild button. A rebuild within 10 minutes is refused (it costs model credit).",
+        "width": 760,
+        "height": 560,
+        "color": 7
+      }
+    },
+    {
+      "id": "529ec478-fd24-51ba-a4a5-c9308f0dc11f",
+      "name": "2 Fetch",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        740,
+        -260
+      ],
+      "parameters": {
+        "content": "## 2 Fetch\nEach source retries once. A failed source never stops the run.",
+        "width": 2640,
+        "height": 560,
+        "color": 5
+      }
+    },
+    {
+      "id": "696d6798-7692-5985-bf50-12fb0e5b69ea",
+      "name": "3 Decide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3420,
+        -260
+      ],
+      "parameters": {
+        "content": "## 3 Decide\nRules filter; the agent judges and calls tools per candidate.",
+        "width": 760,
+        "height": 820,
+        "color": 4
+      }
+    },
+    {
+      "id": "daf02973-3042-5488-b669-047fa3588f0e",
+      "name": "4 Save and answer",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4220,
+        -260
+      ],
+      "parameters": {
+        "content": "## 4 Save and answer\nOne row per day: a rebuild replaces it, never adds a second one.",
+        "width": 1000,
+        "height": 820,
+        "color": 6
+      }
+    },
+    {
+      "id": "d46566a6-a7c8-58f8-b2a7-b341e5fb5f9e",
+      "name": "2 Fetch: my own accounts",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        -1180
+      ],
+      "parameters": {
+        "content": "## 2 Fetch: my own accounts\nEach branch runs only when its credential exists. They sit above the main line: n8n runs the upper branch first, so their results are ready when the sources are checked.",
+        "width": 2480,
+        "height": 860,
+        "color": 5
+      }
+    },
+    {
+      "id": "61e80f21-9f43-5c0a-b742-969c08444133",
+      "name": "Every day 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -60
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e1f57b46-f4eb-5fc5-9757-106eb93cb768",
+      "name": "POST /rebuild",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        120
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rebuild",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "notes": "Called by the Rebuild button on the page (a plain form post).",
+      "webhookId": "638372f1-24cc-52cc-bfad-545f14889275"
+    },
+    {
+      "id": "66fe4944-da29-5d61-a4c7-d0492d086523",
+      "name": "Run context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        40
+      ],
+      "parameters": {
+        "jsCode": "// Who started this run, and which day it is in Paris.\nconst now = $now.setZone('Europe/Paris').setLocale('en');\nconst byRebuild = $('POST /rebuild').isExecuted;\nreturn [{\n  json: {\n    trigger: byRebuild ? 'rebuild' : 'schedule',\n    // The page sends reason=page-open when it builds a missed 08:00 edition.\n    reason: byRebuild && ($('POST /rebuild').first().json.query || {}).reason === 'page-open' ? 'page-open' : null,\n    date: now.toFormat('yyyy-MM-dd'),\n    yesterday: now.minus({ days: 1 }).toFormat('yyyy-MM-dd'),\n    startedAt: now.toISO(),\n    time: now.toFormat('HH:mm:ss'),\n  },\n}];\n"
+      }
+    },
+    {
+      "id": "f2c996f4-80e5-500b-8c5e-9230f4131889",
+      "name": "My watchlist",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        420,
+        40
+      ],
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n \"newsKeywords\": [\n  \"OpenAI\",\n  \"Claude\",\n  \"Anthropic\",\n  \"Apple\",\n  \"Tesla\",\n  \"SpaceX\",\n  \"Codex\"\n ],\n \"memberOnly\": \"club\\\\+|infinity|membres|adh\\u00e9rent\",\n \"dealExclude\": \"coque|etui|\\u00e9tui|housse|protection|verre|film|c\\u00e2ble|cable|chargeur|adaptateur|support|bracelet|reconditionn\",\n \"deals\": [\n  {\n   \"label\": \"MacBook Pro 14 PROLED\",\n   \"query\": \"MacBook Pro 14 M5 Pro PROLED\",\n   \"must\": [\n    \"macbook\",\n    \"\\\\bpro\\\\b\",\n    \"proled|oled|tactile|touch\"\n   ],\n   \"exclude\": \"\\\\bm\\\\d+\\\\s*max\\\\b|\\\\b16\\\\s*(\\\"|''|\\u201d|pouces|po\\\\b|inch)|\\\\bm6\\\\b|occasion|sacoche|clavier\",\n   \"minPrice\": 2500,\n   \"target\": 3129,\n   \"listPrice\": 3299\n  },\n  {\n   \"label\": \"Beta AR Jacket\",\n   \"query\": \"Arc'teryx Beta AR Jacket homme noir\",\n   \"must\": [\n    \"beta\\\\s*ar\\\\b\"\n   ],\n   \"exclude\": \"pant|pantalon|femme|women|\\\\bw'?s\\\\b|beta\\\\s*(lt|sl|sv)\\\\b|occasion\",\n   \"colour\": {\n    \"want\": \"noir|black\",\n    \"other\": \"sapphire|saphir|blanc|white|bleu|blue|rouge|red|vert|green|jaune|yellow|orange|gris|grey|gray|beige|marron|brown|violet|purple|rose|pink|kaki|khaki|navy|marine|olive|void|stone|solitude|dynasty|tatsu|forage|eden|euphoria|lodestar|d\\u00e9lav\\u00e9|bicolore\"\n   },\n   \"gender\": \"homme|\\\\bmen'?s?\\\\b|\\\\bm'?s\\\\b\",\n   \"minPrice\": 300,\n   \"target\": 520,\n   \"listPrice\": 650\n  }\n ],\n \"marketSymbols\": [\n  \"QQQ\",\n  \"AAPL\",\n  \"MSFT\",\n  \"GOOGL\",\n  \"NVDA\",\n  \"META\",\n  \"TSLA\",\n  \"SPCX\"\n ],\n \"marketNames\": {\n  \"QQQ\": \"Nasdaq-100 (Invesco QQQ)\",\n  \"AAPL\": \"Apple\",\n  \"MSFT\": \"Microsoft\",\n  \"GOOGL\": \"Alphabet (Google)\",\n  \"NVDA\": \"Nvidia\",\n  \"META\": \"Meta\",\n  \"TSLA\": \"Tesla\",\n  \"SPCX\": \"SpaceX\"\n },\n \"marketThreshold\": 3,\n \"travel\": {\n  \"origin\": \"CDG\",\n  \"out\": \"2026-12-24\",\n  \"back\": \"2027-01-03\",\n  \"hotelFilter\": {\n   \"minClass\": 3,\n   \"minRating\": 4,\n   \"tag\": \"median of 3-star+, 4.0+, no hostels\"\n  },\n  \"routes\": [\n   {\n    \"city\": \"New York\",\n    \"code\": \"JFK\"\n   },\n   {\n    \"city\": \"Zurich\",\n    \"code\": \"ZRH\"\n   },\n   {\n    \"city\": \"London\",\n    \"code\": \"LHR\"\n   },\n   {\n    \"city\": \"Tokyo\",\n    \"code\": \"HND\"\n   },\n   {\n    \"city\": \"Taipei\",\n    \"code\": \"TPE\"\n   }\n  ]\n }\n}",
+        "options": {}
+      },
+      "executeOnce": true,
+      "notes": "News keywords, deal targets, chart codes and Christmas routes. Edit them here."
+    },
+    {
+      "id": "30eb7801-88f8-54a4-9ccf-de022321271b",
+      "name": "Load today's edition",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        620,
+        40
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_EDITIONS_TABLE_ID",
+          "cachedResultName": "editions"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "date",
+              "condition": "eq",
+              "keyValue": "={{ $('Run context').first().json.date }}"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "f17badd0-4fd9-5233-be99-2dbbf97b11d5",
+      "name": "Rebuilt in the last 10 min?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        820,
+        40
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $('Run context').first().json.trigger === 'rebuild' && !!$json.updated_at && ($now.toMillis() - DateTime.fromISO($json.updated_at).toMillis()) < 600000 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "7ad061ea-8619-526b-bb82-839fbddc9c5f",
+      "name": "Answer: too soon",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1020,
+        -120
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<p>Today's page was rebuilt less than 10 minutes ago. <a href=\"/webhook/today\">Back to the page</a></p>",
+        "options": {
+          "responseCode": 429,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "content-type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "204bf7ac-8e31-599f-a934-09211cb08c46",
+      "name": "Load private config",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1020,
+        60
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_CONFIG_TABLE_ID",
+          "cachedResultName": "config"
+        },
+        "returnAll": true
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "notes": "Private settings: the Zeus link (zeus_ics_url) and the IBKR Flex query ID (ibkr_flex_query_id)."
+    },
+    {
+      "id": "4f26bd50-2050-5736-987f-fcb3d684f4e4",
+      "name": "Zeus link set?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1220,
+        60
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ !!((($('Load private config').all().find(i => i.json.key === 'zeus_ics_url') || {}).json || {}).value || '') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "ac47cabb-bccc-5b74-9c7f-102f25dafa26",
+      "name": "Zeus · timetable (ICS)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1420,
+        -60
+      ],
+      "parameters": {
+        "url": "={{ (($('Load private config').all().find(i => i.json.key === 'zeus_ics_url') || {}).json || {}).value || '' }}",
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "4bbcd179-e2d5-51a1-bbc2-d889774d600b",
+      "name": "Read Zeus events",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1620,
+        -60
+      ],
+      "parameters": {
+        "operation": "fromIcs",
+        "binaryPropertyName": "data",
+        "destinationKey": "data",
+        "options": {}
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Extract From ICS. A login page instead of a calendar fails here."
+    },
+    {
+      "id": "feb486cb-25df-5060-bb46-7e4efc5945ba",
+      "name": "Gmail · list last 24h",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1220,
+        -1000
+      ],
+      "parameters": {
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "newer_than:1d"
+            },
+            {
+              "name": "maxResults",
+              "value": "40"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail read-only (own)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "notes": "My own Google account, scope gmail.readonly only."
+    },
+    {
+      "id": "883830a2-1d8a-52b7-9925-8d374a01e502",
+      "name": "Mail ids",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1420,
+        -1000
+      ],
+      "parameters": {
+        "jsCode": "// One item per mail ID from the list call. No mail in 24 hours: nothing to read, the branch ends here.\nconst list = $input.first().json;\nif (list.error) return [];\nreturn (list.messages || []).slice(0, 40).map((m) => ({ json: { id: m.id } }));\n"
+      }
+    },
+    {
+      "id": "5065f10d-7513-5bcc-a8dc-8b2265821bb2",
+      "name": "Gmail · read headers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1620,
+        -1000
+      ],
+      "parameters": {
+        "url": "={{ 'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + $json.id + '?format=metadata&metadataHeaders=From&metadataHeaders=Subject' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail read-only (own)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "notes": "Sender and subject only, never the body."
+    },
+    {
+      "id": "2cf56007-d04b-58d1-974f-bfac4f27c456",
+      "name": "IBKR · request statement",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1220,
+        -800
+      ],
+      "parameters": {
+        "url": "https://ndcdyn.interactivebrokers.com/AccountManagement/FlexWebService/SendRequest",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ (($('Load private config').all().find(i => i.json.key === 'ibkr_flex_query_id') || {}).json || {}).value || '' }}"
+            },
+            {
+              "name": "v",
+              "value": "3"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "daily-page-n8n/1.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 20000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "YOUR_IBKR_CREDENTIAL_ID",
+          "name": "IBKR Flex (own)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "notes": "Flex Web Service, read-only token. The query ID is in the config table (ibkr_flex_query_id)."
+    },
+    {
+      "id": "f5370909-687f-55e5-b741-d3723fd15b57",
+      "name": "IBKR · wait for report",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1420,
+        -800
+      ],
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "623e136e-f3f0-5992-8a1a-c24561fd6d19",
+      "name": "IBKR · get statement",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1620,
+        -800
+      ],
+      "parameters": {
+        "url": "https://ndcdyn.interactivebrokers.com/AccountManagement/FlexWebService/GetStatement",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ ($('IBKR · request statement').first().json.data || '').match(/<ReferenceCode>(\\d+)</)?.[1] || '' }}"
+            },
+            {
+              "name": "v",
+              "value": "3"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "daily-page-n8n/1.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 20000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "YOUR_IBKR_CREDENTIAL_ID",
+          "name": "IBKR Flex (own)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "d6834d8e-fbce-5a1a-bffc-9870cb69b0e1",
+      "name": "Still generating?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1820,
+        -800
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ /<ErrorCode>(1001|1004|1005|1006|1007|1008|1009|1018|1019|1021)<\\/ErrorCode>/.test(String($json.data || '')) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "executeOnce": true,
+      "notes": "IBKR answers 1019 (and a few other codes) while the report is being made: wait and ask once more."
+    },
+    {
+      "id": "122a1c74-107f-5be0-95d5-6849987b22df",
+      "name": "IBKR · wait again",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2020,
+        -900
+      ],
+      "parameters": {
+        "amount": 20,
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "26edc767-0f3e-5bff-906e-ac8765681f78",
+      "name": "IBKR · get statement (retry)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2220,
+        -900
+      ],
+      "parameters": {
+        "url": "https://ndcdyn.interactivebrokers.com/AccountManagement/FlexWebService/GetStatement",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ ($('IBKR · request statement').first().json.data || '').match(/<ReferenceCode>(\\d+)</)?.[1] || '' }}"
+            },
+            {
+              "name": "v",
+              "value": "3"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "daily-page-n8n/1.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 20000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "YOUR_IBKR_CREDENTIAL_ID",
+          "name": "IBKR Flex (own)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "ef39d2c8-b16e-573f-8783-62bb52334717",
+      "name": "Watchlist codes (IBKR counted)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        -800
+      ],
+      "parameters": {
+        "jsCode": "// The market board shows the 8 watchlist codes (the user's choice, 11-01). The IBKR statement is still read,\n// but its positions are only counted: no code, weight, quantity or amount leaves this node,\n// so nothing from the account is cached, logged, shown or sent to the model.\nconst watch = $('My watchlist').first().json;\nconst ran = (n) => { try { return $(n).isExecuted; } catch (e) { return false; } };\nconst ibkr = { connected: ran('IBKR · request statement'), positions: null, error: null };\nif (ibkr.connected) {\n  const text = (n) => String(($(n).first().json || {}).data || '');\n  const statement = text(ran('IBKR · get statement (retry)') ? 'IBKR · get statement (retry)' : 'IBKR · get statement');\n  const errorCode = (s) => (s.match(/<ErrorCode>(\\d+)<\\/ErrorCode>/) || [])[1];\n  ibkr.error = errorCode(text('IBKR · request statement')) || errorCode(statement) ||\n    (/<FlexQueryResponse/.test(statement) ? null : 'no statement');\n  if (!ibkr.error) {\n    // A query can list one row per lot as well as the summary; count each code once.\n    const codes = new Set();\n    for (const m of statement.matchAll(/<OpenPosition\\b([^>]*?)\\/?>/g)) {\n      const a = {};\n      for (const x of m[1].matchAll(/(\\w+)=\"([^\"]*)\"/g)) a[x[1]] = x[2];\n      if (a.symbol && (!a.levelOfDetail || a.levelOfDetail === 'SUMMARY')) codes.add(a.symbol);\n    }\n    ibkr.positions = codes.size;\n  }\n}\nreturn watch.marketSymbols.slice(0, 8).map((symbol) => ({ json: { symbol, name: (watch.marketNames || {})[symbol] || null, ibkr } }));\n"
+      },
+      "notes": "The 8 watchlist codes to chart. IBKR positions are only counted: no code, weight, quantity or amount goes further."
+    },
+    {
+      "id": "eefa7b3a-875f-5c22-b9df-a529310b9c1e",
+      "name": "Twelve Data · daily candles",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2620,
+        -800
+      ],
+      "parameters": {
+        "url": "https://api.twelvedata.com/time_series",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "={{ $json.symbol }}"
+            },
+            {
+              "name": "interval",
+              "value": "1day"
+            },
+            {
+              "name": "outputsize",
+              "value": "30"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "YOUR_TWELVEDATA_CREDENTIAL_ID",
+          "name": "Twelve Data (own)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "notes": "One request per code, at most 8: the free plan allows 8 a minute."
+    },
+    {
+      "id": "2620c33f-8c80-5aba-985f-eaa723bce369",
+      "name": "Load travel cache",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1220,
+        -600
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_SOURCE_CACHE_TABLE_ID",
+          "cachedResultName": "source_cache"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "source",
+              "condition": "eq",
+              "keyValue": "travel"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "e0c63633-76d6-5cf6-ae00-c3f8cad33250",
+      "name": "Load shopping cache",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1420,
+        -600
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_SOURCE_CACHE_TABLE_ID",
+          "cachedResultName": "source_cache"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "source",
+              "condition": "eq",
+              "keyValue": "shopping"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "d0da83e4-760a-53d6-a9b7-f45af997818d",
+      "name": "SerpApi · this month",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1620,
+        -600
+      ],
+      "parameters": {
+        "url": "https://serpapi.com/account.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "YOUR_SERPAPI_CREDENTIAL_ID",
+          "name": "SerpApi (own)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "notes": "Searches left this month, read before any search (free call). This run's searches are added to the count."
+    },
+    {
+      "id": "fd9ddaf1-be90-5a3e-97e4-74397fd5b9be",
+      "name": "SerpApi plan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1820,
+        -600
+      ],
+      "parameters": {
+        "jsCode": "// SerpApi's free plan has 250 searches a month. This node decides which searches run now.\n// A search made earlier today is never repeated, so a rebuild (for example during the defense) costs 0 searches.\n// The order is flights, then Google Shopping, then hotels. A search that would leave fewer than 15 searches\n// for later is skipped and its cache is used; the log says so in one line.\nconst MARGIN = 15;\nconst ctx = $('Run context').first().json;\nconst watch = $('My watchlist').first().json;\nconst t = watch.travel;\nconst searchedToday = (node) => String(($(node).first().json || {}).fetched_at || '').slice(0, 10) === ctx.date;\n\nconst acc = $('SerpApi · this month').first().json || {};\nconst left = Number.isFinite(acc.plan_searches_left) ? acc.plan_searches_left\n  : Number.isFinite(acc.searches_per_month) && Number.isFinite(acc.this_month_usage) ? acc.searches_per_month - acc.this_month_usage : null;\n\n// Hotels change slowly: each city once a week, and again when the hotel filter changes.\nconst cache = $('Load travel cache').first().json;\nconst hotels = (cache && cache.payload ? JSON.parse(cache.payload).hotels : null) || {};\nconst weekAgo = $now.setZone('Europe/Paris').minus({ days: 7 }).toFormat('yyyy-MM-dd');\nconst hotelRoutes = t.routes\n  .filter((r) => !hotels[r.code] || hotels[r.code].searchedOn <= weekAgo || hotels[r.code].filter !== t.hotelFilter.tag)\n  .map((r) => ({ city: r.city, code: r.code, out: t.out, back: t.back, day: ctx.date }));\n\nconst due = { flights: searchedToday('Load travel cache') ? 0 : t.routes.length,\n  shopping: searchedToday('Load shopping cache') ? 0 : watch.deals.filter((d) => d.query).length, hotels: hotelRoutes.length };\n// When the account call fails, the count is unknown and the searches run as before.\nlet budget = left == null ? Infinity : left - MARGIN;\nconst fits = (n) => {\n  if (!n || n > budget) return false;\n  budget -= n;\n  return true;\n};\nconst flights = fits(due.flights);\nconst shopping = fits(due.shopping);\nconst hotelCount = Math.max(0, Math.min(due.hotels, budget));\nconst skipped = [[!flights && due.flights, ' flight'], [!shopping && due.shopping, ' Google Shopping'], [due.hotels - hotelCount, ' hotel']]\n  .filter(([n]) => n > 0).map(([n, what]) => n + what + (n > 1 ? ' searches' : ' search'));\nconst note = skipped.length ? 'SerpApi quota guard: ' + left + ' searches left this month, kept ' + MARGIN + ' for later; skipped ' +\n  skipped.join(', ') + ' (cache used)' : null;\nreturn [{ json: { left, margin: MARGIN, due, flights, shopping, hotels: hotelRoutes.slice(0, hotelCount), note } }];\n"
+      },
+      "notes": "250 searches a month. Flights, then Google Shopping, then hotels; at least 15 are kept for later. A search made earlier today is never repeated, so a rebuild costs 0 searches."
+    },
+    {
+      "id": "b277c330-36de-5da2-b834-8e8ce3a125a9",
+      "name": "Search flights?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2020,
+        -600
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $('SerpApi plan').first().json.flights === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "cf5ff4ab-41d5-5f0a-9b54-dc2ee14631e0",
+      "name": "Routes to search",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2220,
+        -680
+      ],
+      "parameters": {
+        "jsCode": "// One SerpApi flight search per route: 5 a day, about 150 a month on the free plan's 250.\nconst t = $('My watchlist').first().json.travel;\nreturn t.routes.map((r) => ({ json: { city: r.city, code: r.code, from: t.origin, out: t.out, back: t.back } }));\n"
+      }
+    },
+    {
+      "id": "95a46ce7-286d-586a-b514-d6fd9984a4db",
+      "name": "SerpApi · flights",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2420,
+        -680
+      ],
+      "parameters": {
+        "url": "https://serpapi.com/search.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google_flights"
+            },
+            {
+              "name": "departure_id",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "arrival_id",
+              "value": "={{ $json.code }}"
+            },
+            {
+              "name": "outbound_date",
+              "value": "={{ $json.out }}"
+            },
+            {
+              "name": "return_date",
+              "value": "={{ $json.back }}"
+            },
+            {
+              "name": "currency",
+              "value": "EUR"
+            },
+            {
+              "name": "hl",
+              "value": "en"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "YOUR_SERPAPI_CREDENTIAL_ID",
+          "name": "SerpApi (own)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "1d9579c9-0c1f-5e10-8163-c15569e8dad9",
+      "name": "Search shopping?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2620,
+        -600
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $('SerpApi plan').first().json.shopping === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "b198ee9b-52b6-509c-b69a-ce5f268cc1d1",
+      "name": "Products to search",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2820,
+        -680
+      ],
+      "parameters": {
+        "jsCode": "// One Google Shopping search per watchlist item (2 a day), in France and in French.\nconst watch = $('My watchlist').first().json;\nreturn watch.deals.filter((d) => d.query).map((d) => ({ json: { label: d.label, q: d.query } }));\n"
+      }
+    },
+    {
+      "id": "be0c0442-f4ec-5de0-9bf2-c6a7894069e7",
+      "name": "SerpApi · shopping",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3020,
+        -680
+      ],
+      "parameters": {
+        "url": "https://serpapi.com/search.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google_shopping"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.q }}"
+            },
+            {
+              "name": "gl",
+              "value": "fr"
+            },
+            {
+              "name": "hl",
+              "value": "fr"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "YOUR_SERPAPI_CREDENTIAL_ID",
+          "name": "SerpApi (own)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "notes": "One search per watchlist item, once a day. New prices only: used and refurbished offers are left out later."
+    },
+    {
+      "id": "9cd9d311-39ad-567f-836a-fd83fb452c6d",
+      "name": "Hotels due this week",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3220,
+        -600
+      ],
+      "parameters": {
+        "jsCode": "// The cities to search for hotels now: chosen by SerpApi plan (once a week per city, within the monthly quota).\n// It also runs when the flights were already searched today.\nreturn $('SerpApi plan').first().json.hotels.map((r) => ({ json: r }));\n"
+      }
+    },
+    {
+      "id": "f2612dd7-983e-568b-b2c8-91e860de4c06",
+      "name": "SerpApi · hotels",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3420,
+        -600
+      ],
+      "parameters": {
+        "url": "https://serpapi.com/search.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google_hotels"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.city + ' hotels' }}"
+            },
+            {
+              "name": "check_in_date",
+              "value": "={{ $json.out }}"
+            },
+            {
+              "name": "check_out_date",
+              "value": "={{ $json.back }}"
+            },
+            {
+              "name": "adults",
+              "value": "1"
+            },
+            {
+              "name": "currency",
+              "value": "EUR"
+            },
+            {
+              "name": "hl",
+              "value": "en"
+            },
+            {
+              "name": "hotel_class",
+              "value": "3,4,5"
+            },
+            {
+              "name": "rating",
+              "value": "8"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "YOUR_SERPAPI_CREDENTIAL_ID",
+          "name": "SerpApi (own)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "notes": "3 stars or more, rated 4.0 or more (rating=8), Google's usual order. The price used is the median, hostels left out."
+    },
+    {
+      "id": "e8c2713d-70bb-55ef-8e8b-9c9f5ce12d6c",
+      "name": "AIHOT · hot topics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2020,
+        60
+      ],
+      "parameters": {
+        "url": "https://aihot.news/api/v1/hot-topics",
+        "sendQuery": false,
+        "queryParameters": {
+          "parameters": []
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "aihot-api/2.0.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "93ec8d95-a164-5492-87b9-27db44367647",
+      "name": "AIHOT · last 24h",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2220,
+        60
+      ],
+      "parameters": {
+        "url": "https://aihot.news/api/v1/items",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "window",
+              "value": "24h"
+            },
+            {
+              "name": "limit",
+              "value": "100"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "aihot-api/2.0.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "bd333ff0-6a42-5a4c-9b1c-01a939c43a64",
+      "name": "AIHOT · Codex resets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2420,
+        60
+      ],
+      "parameters": {
+        "url": "https://aihot.news/api/v1/codex-resets/recent",
+        "sendQuery": false,
+        "queryParameters": {
+          "parameters": []
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "aihot-api/2.0.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "fd373541-51fe-5a63-95e6-7e570df924e3",
+      "name": "Dealabs · Apple",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        2620,
+        60
+      ],
+      "parameters": {
+        "url": "https://www.dealabs.com/rss/groupe/apple",
+        "options": {
+          "customFields": "pepper:merchant"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "11a49a74-0aa5-5ed9-bbdc-d0bfbc30b4b6",
+      "name": "Dealabs · sportswear",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        2820,
+        60
+      ],
+      "parameters": {
+        "url": "https://www.dealabs.com/rss/groupe/vetements-de-sport",
+        "options": {
+          "customFields": "pepper:merchant"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "3d5cccf8-f3e2-5fde-a4a1-ed465dbab481",
+      "name": "Dealabs · fashion",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        3020,
+        60
+      ],
+      "parameters": {
+        "url": "https://www.dealabs.com/rss/groupe/mode",
+        "options": {
+          "customFields": "pepper:merchant"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "f84ef0af-8987-505e-a392-4c8fa05d6c78",
+      "name": "Dealabs · hiking",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        3220,
+        60
+      ],
+      "parameters": {
+        "url": "https://www.dealabs.com/rss/groupe/randonnee",
+        "options": {
+          "customFields": "pepper:merchant"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "e937374c-40aa-55a1-8f85-40d1d8f7dae4",
+      "name": "Load source cache",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2620,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_SOURCE_CACHE_TABLE_ID",
+          "cachedResultName": "source_cache"
+        },
+        "returnAll": true
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "fc55ec9b-f08a-57e0-9a1a-cef16a2de55f",
+      "name": "Load yesterday's edition",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2820,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_EDITIONS_TABLE_ID",
+          "cachedResultName": "editions"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "date",
+              "condition": "eq",
+              "keyValue": "={{ $('Run context').first().json.yesterday }}"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "bf265dba-0595-5896-b5e3-9c6d705d34af",
+      "name": "Load price log",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2920,
+        460
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_PRICE_HISTORY_TABLE_ID",
+          "cachedResultName": "price_history"
+        },
+        "returnAll": true
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "c4aa9130-e991-5dc0-86f2-f5d04bd662b4",
+      "name": "Check sources and use cache",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3020,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Decide, per source, whether today's data is usable. A failed source falls back to the\n// last good copy in source_cache and is marked \"stale\". Nothing here calls the model.\nconst ctx = $('Run context').first().json;\nconst watch = $('My watchlist').first().json;\nconst cache = {};\nfor (const item of $('Load source cache').all()) {\n  if (item.json.source) cache[item.json.source] = item.json;\n}\nconst cached = (key) => (cache[key] ? JSON.parse(cache[key].payload) : null);\nconst log = [];\nconst updates = [];\n\n// A node exists only once its source is connected, so check before reading it.\nconst ran = (n) => { try { return $(n).isExecuted; } catch (e) { return false; } };\n\n// An HTTP or RSS node set to \"continue\" returns { error } instead of data.\nfunction failure(nodeName) {\n  if (!ran(nodeName)) return null;\n  const items = $(nodeName).all();\n  if (!items.length) return 'no response';\n  const e = items[0].json.error;\n  if (!e) return null;\n  const text = typeof e === 'string' ? e : (e.message || e.description || JSON.stringify(e));\n  const code = (e.httpCode || (String(text).match(/[1-5][0-9][0-9]/) || [])[0]);\n  return code ? 'HTTP ' + code : String(text).slice(0, 60);\n}\n\nfunction source(key, nodes, read, meta) {\n  let failed = nodes.map(failure).filter(Boolean);\n  let payload = null;\n  if (!failed.length) {\n    try { payload = read(); } catch (e) { failed = [String(e.message || e).slice(0, 60)]; }\n  }\n  if (!failed.length) {\n    updates.push({ source: key, fetched_at: ctx.startedAt, payload: JSON.stringify(payload) });\n    log.push({ t: ctx.time, msg: meta.short + ': OK' });\n    return { payload, status: { ...meta, status: 'ok', detail: meta.describe(payload), code: null, note: null, cachedAt: null, fetched: ctx.time } };\n  }\n  const code = failed[0];\n  log.push({ t: ctx.time, msg: meta.short + ': ' + code + ' after one retry, cache used', bad: true });\n  const old = cache[key];\n  return {\n    payload: old ? JSON.parse(old.payload) : null,\n    status: {\n      ...meta,\n      status: 'stale',\n      detail: old ? meta.describe(JSON.parse(old.payload)) : 'No data',\n      code,\n      note: meta.short + ' returned ' + code + ' twice. ' + (old ? 'Showing the copy from ' + old.fetched_at.slice(0, 16).replace('T', ' ') + '.' : 'No cached copy yet.') + ' The next run retries automatically.',\n      cachedAt: old ? old.fetched_at : null,\n      fetched: ctx.time,\n    },\n  };\n}\n\n// Zeus runs only when the private config table has a link. Classes for the next 14 days, Paris time.\n// A revoked link answers with an error or a login page; both count as a failure here.\nconst zeus = ran('Zeus · timetable (ICS)') ? source(\n  'zeus',\n  ['Zeus · timetable (ICS)', 'Read Zeus events'],\n  () => {\n    const from = $now.setZone('Europe/Paris').startOf('day');\n    const until = from.plus({ days: 14 });\n    const at = (d) => DateTime.fromISO(new Date(d).toISOString()).setZone('Europe/Paris');\n    return (($('Read Zeus events').first().json.data || {}).events || [])\n      // Zeus also lists holidays (\"Vacances\", \"Bank Holiday\") as events; they are not classes.\n      .filter((e) => e.start && !/vacances|holiday|férié/i.test(e.summary || ''))\n      .filter((e) => at(e.start.date) >= from && at(e.start.date) < until)\n      .sort((a, b) => at(a.start.date) - at(b.start.date))\n      .map((e) => {\n        const start = at(e.start.date);\n        const end = e.end ? at(e.end.date) : start;\n        const group = (String(e.description || '').match(/group[es]*\\s*:\\s*([^\\n]+)/i) || [])[1] || null;\n        return { start: start.toISO(), day: start.toFormat('yyyy-MM-dd'), time: start.toFormat('HH:mm') + '–' + end.toFormat('HH:mm'),\n          title: e.summary || 'Untitled class', where: [e.location, group].filter(Boolean).join(', ') || 'Room not listed' };\n      });\n  },\n  { key: 'zeus', short: 'Zeus', name: 'Zeus timetable (ICS link)', url: 'https://zeus.ionis-it.com',\n    describe: (p) => p.length + ' classes in the next 14 days' },\n) : null;\n\n// Gmail, read only: sender, subject and a short snippet. Newsletters and promotions are only counted.\n// A mail is new when the previous run did not see its ID (the run before is normally yesterday's 08:00).\nconst BULK = ['CATEGORY_PROMOTIONS', 'CATEGORY_SOCIAL', 'CATEGORY_FORUMS'];\n// A one-time code (verification, 2FA, login) is a credential: the page is shown on a projector and the mail would also\n// go to the model and the cache. Such a mail is only counted; its snippet is dropped and its digits become \"••••\".\n// The rule is broad on purpose: a false match only hides one mail.\nconst CODE_WORDS = /ne pas partager|code de v[ée]rification|verification code|your code|votre code|one[- ]time|\\botp\\b|\\b2fa\\b|code de connexion|login code|security code|code de s[ée]curit[ée]|passcode/i;\nconst CODE_DIGITS = /\\b\\d{4,8}\\b|\\b\\d{3}[ -]\\d{3}\\b/;\nconst NOREPLY = /no-?reply|ne-?pas-?r[ée]pondre|do-?not-?reply/i;\nconst withoutCode = (m) => {\n  const text = m.subject + ' ' + (m.snippet || '');\n  // Without a code word, a no-reply sender with digits in the subject counts too; a year such as 2026 does not.\n  const digitsNoYear = CODE_DIGITS.test(String(m.subject).replace(/\\b(19|20)\\d\\d\\b/g, ''));\n  if (!m.code && !((CODE_WORDS.test(text) && CODE_DIGITS.test(text)) || (digitsNoYear && NOREPLY.test(m.sender || m.from)))) return m;\n  return { ...m, code: true, subject: String(m.subject).replace(/\\d+/g, '••••'), snippet: '' };\n};\nconst gmail = ran('Gmail · list last 24h') ? source(\n  'gmail',\n  ['Gmail · list last 24h', 'Gmail · read headers'],\n  () => {\n    const seen = new Set((cached('gmail') || []).map((m) => m.id));\n    const read = ran('Gmail · read headers') ? $('Gmail · read headers').all() : [];\n    return read.filter((i) => i.json.id).map((i) => {\n      const h = {};\n      for (const x of ((i.json.payload || {}).headers || [])) h[String(x.name).toLowerCase()] = x.value;\n      const sender = String(h.from || '');\n      const m = withoutCode({ id: i.json.id, sender, from: sender.replace(/\\s*<[^>]*>\\s*$/, '').replace(/^\"(.*)\"$/, '$1') || sender,\n        subject: h.subject || '(no subject)', snippet: String(i.json.snippet || '').slice(0, 200),\n        bulk: (i.json.labelIds || []).some((l) => BULK.includes(l)), isNew: !seen.has(i.json.id) });\n      delete m.sender; // the address was only needed to spot a no-reply sender\n      return m;\n    });\n  },\n  { key: 'gmail', short: 'Gmail', name: 'Gmail, last 24 hours (read only)', url: 'https://mail.google.com',\n    describe: (p) => p.length + ' mails in 24 hours, ' + p.filter((m) => m.isNew).length + ' new since the last run' },\n) : null;\n// A copy cached before 11-01 may still hold a code: clean it the same way before anything uses it.\nif (gmail && gmail.payload) gmail.payload = gmail.payload.map(withoutCode);\n\n// Market: the 8 watchlist codes with Twelve Data's daily candles (the user's choice, 11-01). The IBKR account is\n// still read, but only its number of positions is kept, and it is not shown. A code without candles is listed in\n// \"missing\" with the reason; the others are shown as usual. Only when every code fails is the board stale.\nconst tdReason = (c) => (c.error ? 'HTTP ' + (c.error.httpCode || (String(c.error.message || '').match(/[1-5][0-9][0-9]/) || [])[0] || '?')\n  // Twelve Data writes its messages in Markdown (\"**symbol** not found\"); the page shows plain text.\n  : c.status === 'error' ? 'Twelve Data ' + (c.code || 'error') + ': ' + String(c.message || '').replace(/\\*/g, '').slice(0, 60) : 'no candles');\nconst ibkrText = (b) => (!b ? '' : !b.connected ? 'IBKR not connected'\n  : b.error ? 'IBKR account: error ' + b.error : 'IBKR account: ' + b.positions + (b.positions === 1 ? ' position' : ' positions') + ', not shown');\nconst market = ran('Twelve Data · daily candles') ? source(\n  'market',\n  [],\n  () => {\n    const codes = $('Watchlist codes (IBKR counted)').all().map((i) => i.json);\n    const candles = $('Twelve Data · daily candles').all().map((i) => i.json);\n    const missing = [];\n    let lastClose = null;\n    const holdings = codes.map((p, k) => {\n      const c = candles[k] || {};\n      const values = (c.values || []).slice().reverse();\n      if (!values.length) {\n        missing.push({ symbol: p.symbol, reason: tdReason(c) });\n        return null;\n      }\n      const closes = values.map((v) => Number(v.close));\n      const last = closes[closes.length - 1];\n      const prev = closes[closes.length - 2] || last;\n      // Candles are daily closes: on a weekend or a holiday the newest one is from the last trading day.\n      const day = String(values[values.length - 1].datetime).slice(0, 10);\n      if (!lastClose || day > lastClose) lastClose = day;\n      return { symbol: p.symbol, name: p.name || null, weightPct: null, pct: Math.round(((last - prev) / prev) * 1000) / 10, closes,\n        ohlc: values.map((v) => ({ o: Number(v.open), h: Number(v.high), l: Number(v.low), c: Number(v.close) })) };\n    }).filter(Boolean);\n    if (!holdings.length) throw new Error((missing[0] || {}).reason || 'Twelve Data returned no candles');\n    return { holdings, missing, codesFrom: 'watchlist', lastClose, ibkr: (codes[0] || {}).ibkr || null };\n  },\n  { key: 'market', short: 'Twelve Data (watchlist)', name: 'Twelve Data daily candles for the watchlist codes; IBKR Flex account read, positions not shown',\n    url: 'https://twelvedata.com',\n    describe: (p) => {\n      const miss = p.missing || [];\n      const n = p.holdings.length + miss.length;\n      return (miss.length ? p.holdings.length + ' of ' + n : n) + (n === 1 ? ' watchlist code, ' : ' watchlist codes, ') +\n        ((p.holdings[0] || {}).closes || []).length + ' days each' + (miss.length ? ' (' + miss.map((m) => m.symbol + ': ' + m.reason).join(', ') + ')' : '') +\n        (p.ibkr ? '; ' + ibkrText(p.ibkr) : '');\n    } },\n) : null;\n// A copy cached before 11-01 may hold the IBKR position; only watchlist codes are ever shown.\nif (market && market.payload && market.payload.codesFrom !== 'watchlist') {\n  market.payload = { ...market.payload, codesFrom: 'watchlist', holdings: market.payload.holdings.filter((h) => watch.marketSymbols.includes(h.symbol)) };\n}\nif (market && market.payload && (market.payload.missing || []).length) {\n  log.push({ t: ctx.time, msg: 'Twelve Data: no candles for ' + market.payload.missing.map((m) => m.symbol + ' (' + m.reason + ')').join(', ') + '; the other codes are shown', bad: true });\n}\n\n// Travel: flights are searched at most once a day; a rebuild later the same day reuses the morning search.\n// Hotels are searched once a week per city, 3 stars or more and rated 4.0 or more (hostel beds do not count).\nlet travel = null;\nconst travelMeta = { key: 'travel', short: 'SerpApi', name: 'SerpApi Google Flights and Hotels', url: 'https://serpapi.com',\n  describe: (p) => p.routes.length + ' routes, ' + p.dates };\nconst month = ctx.date.slice(0, 7);\nconst weekAgo = DateTime.fromISO(ctx.date).minus({ days: 7 }).toISODate();\nfunction withHotels(old) {\n  const filter = watch.travel.hotelFilter;\n  const tag = filter.tag;\n  const hostel = /hostel|hostal|dorm|capsule|backpack|bunk|publove|meininger|generator|wombat|\\bpod\\b/i;\n  const hotels = { ...(old.hotels || {}) };\n  if (ran('SerpApi · hotels')) {\n    const due = $('Hotels due this week').all();\n    $('SerpApi · hotels').all().forEach((h, k) => {\n      const ok = (x) => (x.type || 'hotel') === 'hotel' && (x.extracted_hotel_class || 0) >= filter.minClass &&\n        (x.overall_rating || 0) >= filter.minRating && !hostel.test(x.name || '');\n      const rates = (h.json.properties || []).filter(ok).map((x) => (x.rate_per_night || {}).extracted_lowest).filter((n) => n > 0).sort((a, b) => a - b);\n      const code = (due[k] || { json: {} }).json.code;\n      // The median nightly rate after taxes: a typical hotel, not the one cheapest room.\n      if (code) hotels[code] = { perNight: rates.length ? rates[Math.floor(rates.length / 2)] : null, searchedOn: ctx.date, filter: tag };\n    });\n  }\n  // The month's count is read before this run's searches (SerpApi's counter lags a few seconds), then this run's searches are added.\n  const made = ['SerpApi · flights', 'SerpApi · shopping', 'SerpApi · hotels'].reduce((n, x) => n + (ran(x) ? $(x).all().length : 0), 0);\n  const reported = ran('SerpApi · this month') ? $('SerpApi · this month').first().json : {};\n  const before = reported.this_month_usage != null ? reported.this_month_usage : (old.usage && old.usage.month === month ? old.usage.used : 0);\n  const of = reported.searches_per_month || (old.usage || {}).of || 250;\n  return { hotels, usage: { used: before + made, of, month } };\n}\nconst plan = ran('SerpApi plan') ? $('SerpApi plan').first().json : null;\nif (plan && plan.note) log.push({ t: ctx.time, msg: plan.note });\nif (ran('Load travel cache') && !ran('SerpApi · flights')) {\n  const p = cached('travel');\n  // Not searched today means the quota guard skipped the flights: the last search is shown and marked stale.\n  const today = p && cache.travel.fetched_at.slice(0, 10) === ctx.date;\n  if (p) {\n    const payload = { ...p, ...withHotels(p) };\n    if (ran('SerpApi · hotels')) updates.push({ source: 'travel', fetched_at: cache.travel.fetched_at, payload: JSON.stringify(payload) });\n    travel = { payload, status: { ...travelMeta, status: today ? 'ok' : 'stale', detail: travelMeta.describe(payload), code: null,\n      note: today ? 'Flights searched at ' + cache.travel.fetched_at.slice(11, 16) + ' today; a rebuild reuses them to save SerpApi searches.'\n        : 'Flights not searched today: the SerpApi quota guard kept ' + plan.margin + ' searches for later. Showing the search from ' +\n          cache.travel.fetched_at.slice(0, 16).replace('T', ' ') + '.',\n      cachedAt: cache.travel.fetched_at, fetched: cache.travel.fetched_at.slice(11, 19) } };\n  }\n  log.push({ t: ctx.time, msg: 'SerpApi: ' + (today ? 'flights already searched today, cache reused' : 'flights skipped, last search reused') +\n    (ran('SerpApi · hotels') ? '; hotels searched' : '') });\n} else if (ran('SerpApi · flights')) {\n  travel = source('travel', ['SerpApi · flights'], () => {\n    const routes = $('Routes to search').all().map((i) => i.json);\n    const flights = $('SerpApi · flights').all().map((i) => i.json);\n    const old = cached('travel') || {};\n    return {\n      dates: 'Round trip from Paris ' + watch.travel.origin + ', ' + [watch.travel.out, watch.travel.back]\n        .map((d) => DateTime.fromISO(d).setLocale('en').toFormat('d LLL yyyy')).join(' to '),\n      routes: routes.map((r, k) => {\n        const f = flights[k] || {};\n        const prices = [].concat(f.best_flights || [], f.other_flights || []).map((x) => x.price).filter((n) => n > 0);\n        const insights = f.price_insights || {};\n        // Google's price_history is one fare per Paris day and ends with today (execution 308: the last point is\n        // 11-01 00:00 Paris and equals today's fare). Keep the 7 calendar days before today, with their dates.\n        const history = (insights.price_history || []).filter((x) => x[1] > 0)\n          .map(([t, price]) => ({ day: DateTime.fromSeconds(t).setZone('Europe/Paris').toISODate(), price }))\n          .filter((x) => x.day >= weekAgo && x.day < ctx.date);\n        return { city: r.city, code: r.code, fare: prices.length ? Math.min(...prices) : null, history,\n          typical: insights.typical_price_range || null };\n      }),\n      ...withHotels(old),\n    };\n  }, travelMeta);\n}\n\nconst aihot = source(\n  'aihot',\n  ['AIHOT · hot topics', 'AIHOT · last 24h', 'AIHOT · Codex resets'],\n  () => ({\n    hot: $('AIHOT · hot topics').first().json.items || [],\n    items: ($('AIHOT · last 24h').first().json.items || []).map((i) => ({\n      id: i.id, title: i.title, summary: (i.summary || '').slice(0, 280), url: i.links && i.links.aihot,\n      category: i.category, score: i.score, publishedAt: i.publishedAt,\n    })),\n    codex: $('AIHOT · Codex resets').first().json,\n  }),\n  { key: 'aihot', short: 'AIHOT', name: 'AIHOT public API', url: 'https://aihot.news/hot',\n    describe: (p) => (p.hot || []).length + ' hot topics, ' + (p.items || []).length + ' items in 24 hours' },\n);\n\nconst FEEDS = { 'Dealabs · Apple': 'apple', 'Dealabs · sportswear': 'vetements-de-sport', 'Dealabs · fashion': 'mode', 'Dealabs · hiking': 'randonnee' };\nconst deals = source(\n  'deals',\n  Object.keys(FEEDS),\n  () => Object.entries(FEEDS).flatMap(([node, feed]) => $(node).all().map((i) => {\n    const m = (i.json['pepper:merchant'] || {}).$ || {};\n    return { feed, title: i.json.title, link: i.json.link, merchant: m.name || null, priceText: m.price || null, isoDate: i.json.isoDate };\n  })),\n  // Prices also come from Google Shopping when SerpApi is connected, so the source names both.\n  { key: 'deals', short: ran('Load shopping cache') ? 'Dealabs + Google Shopping' : 'Dealabs',\n    name: ran('Load shopping cache') ? 'Dealabs RSS (4 feeds) and SerpApi Google Shopping (FR)' : 'Dealabs RSS: apple, fashion, sportswear, hiking',\n    url: 'https://www.dealabs.com/groupe/apple',\n    describe: (p) => p.length + ' items from 4 feeds' },\n);\n\n// Google Shopping is part of the Deals source: 2 searches a day, reused by a rebuild the same day.\n// If it fails or is skipped, Dealabs is shown as usual and the Deals detail says so.\nlet shopping = null;\nlet shopNote = null;\nif (ran('SerpApi · shopping')) {\n  const asked = $('Products to search').all().map((i) => i.json);\n  const got = $('SerpApi · shopping').all().map((i) => i.json);\n  const products = {};\n  const failed = [];\n  asked.forEach((a, k) => {\n    const g = got[k] || {};\n    if (!Array.isArray(g.shopping_results)) {\n      const e = g.error || 'no results';\n      failed.push(typeof e === 'string' ? e.slice(0, 40) : 'HTTP ' + (e.httpCode || (String(e.message || '').match(/[1-5][0-9][0-9]/) || [])[0] || '?'));\n      return;\n    }\n    products[a.label] = g.shopping_results.filter((r) => r.extracted_price > 0).map((r) => ({ title: r.title, price: r.extracted_price,\n      merchant: r.source || null, used: r.second_hand_condition || null, link: r.product_link || null }));\n  });\n  if (Object.keys(products).length) {\n    shopping = { date: ctx.date, products };\n    updates.push({ source: 'shopping', fetched_at: ctx.startedAt, payload: JSON.stringify(shopping) });\n  }\n  shopNote = 'Google Shopping: ' + (Object.keys(products).length + ' of ' + asked.length + ' searches') +\n    (failed.length ? ' (' + failed[0] + (shopping ? ')' : '), Dealabs only') : '');\n  log.push({ t: ctx.time, msg: shopNote, ...(failed.length ? { bad: true } : {}) });\n} else if (cache.shopping && cache.shopping.fetched_at.slice(0, 10) === ctx.date) {\n  shopping = cached('shopping');\n  shopNote = 'Google Shopping searched at ' + cache.shopping.fetched_at.slice(11, 16) + ' today, reused';\n} else if (plan && plan.due && plan.due.shopping) {\n  shopNote = 'Google Shopping skipped by the quota guard, Dealabs only';\n}\nif (shopNote && deals.status.status === 'ok') deals.status.detail += ' · ' + shopNote;\n\n// Sources that are planned but not connected yet. The page shows them as \"not connected\".\nconst off = (key, short, name) => ({ key, short, name, status: 'off', detail: 'Not connected yet', code: null, note: 'Not connected yet.', cachedAt: null, fetched: null, url: null });\nfor (const x of [aihot, deals, zeus, gmail, market, travel].filter(Boolean)) delete x.status.describe;\nconst sources = [\n  zeus ? zeus.status : off('zeus', 'Zeus', 'Zeus timetable (ICS link)'),\n  gmail ? gmail.status : off('gmail', 'Gmail', 'Gmail, last 24 hours (read only)'),\n  market ? market.status : off('market', 'Twelve Data (watchlist)', 'Twelve Data daily candles for the watchlist codes'),\n  aihot.status,\n  deals.status,\n  travel ? travel.status : off('travel', 'SerpApi', 'SerpApi Google Flights and Hotels'),\n];\n\nconst data = { aihot: aihot.payload, deals: deals.payload, shopping };\nfor (const [k, v] of Object.entries({ zeus, gmail, market, travel })) data[k] = v ? v.payload : null;\nreturn [{ json: { sources, data, cacheUpdates: updates, log } }];\n"
+      },
+      "notes": "Failure case: a source that failed twice is shown from cache and marked stale."
+    },
+    {
+      "id": "bee7cc6f-bb93-59e6-8fc9-dccd6b32c238",
+      "name": "Cache rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3220,
+        460
+      ],
+      "parameters": {
+        "jsCode": "// One row per source that answered today. Failed sources keep their old cache row.\nreturn $('Check sources and use cache').first().json.cacheUpdates.map((row) => ({ json: row }));\n"
+      }
+    },
+    {
+      "id": "bd4b1944-bc65-5650-9986-2c81a02cd7b3",
+      "name": "Save source cache",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3420,
+        460
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_SOURCE_CACHE_TABLE_ID",
+          "cachedResultName": "source_cache"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "source",
+              "condition": "eq",
+              "keyValue": "={{ $json.source }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "4d7d6d24-1839-5d47-9e47-143f7257382a",
+      "name": "Timetable rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3220,
+        -120
+      ],
+      "parameters": {
+        "jsCode": "// One row per day for the next 14 days, so lookup_courses can answer \"which classes are on <date>?\".\n// A day with no class gets an empty list, so a cancelled class disappears on the next fetch.\n// Only after a successful fetch: a stale run keeps the rows from the last good one.\nconst ctx = $('Run context').first().json;\nconst checked = $('Check sources and use cache').first().json;\nconst zeus = checked.sources.find((s) => s.key === 'zeus');\nif (!zeus || zeus.status !== 'ok') return [];\nconst first = $now.setZone('Europe/Paris').startOf('day');\nreturn Array.from({ length: 14 }, (_, i) => {\n  const day = first.plus({ days: i }).toFormat('yyyy-MM-dd');\n  const classes = checked.data.zeus.filter((c) => c.day === day).map(({ time, title, where }) => ({ time, title, where }));\n  return { json: { day, classes: JSON.stringify(classes), fetched_at: ctx.startedAt } };\n});\n"
+      }
+    },
+    {
+      "id": "d760a4ef-2799-54df-8076-68267f222954",
+      "name": "Save timetable (upsert by day)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3420,
+        -120
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_TIMETABLE_TABLE_ID",
+          "cachedResultName": "timetable"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "day",
+              "condition": "eq",
+              "keyValue": "={{ $json.day }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null
+        },
+        "options": {}
+      },
+      "notes": "Next 14 days, one row per day. lookup_courses reads this table."
+    },
+    {
+      "id": "14ea12fc-fdbf-541d-b080-dd15581b2518",
+      "name": "Pick candidates",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3240,
+        40
+      ],
+      "parameters": {
+        "jsCode": "// \"Pick candidates\": turn raw source data into a short list of candidates for the editor agent.\n// Plain rules do the filtering; the agent only judges what is left.\nconst ctx = $('Run context').first().json;\nconst checked = $('Check sources and use cache').first().json;\nconst watch = $('My watchlist').first().json;\nconst yesterday = $(\"Load yesterday's edition\").first().json;\n\n// News already shown yesterday is not new today.\nconst seen = new Set();\nif (yesterday && yesterday.edition) {\n  try {\n    for (const a of (JSON.parse(yesterday.edition).ai || {}).watch || []) seen.add(a.url);\n  } catch (e) { /* ignore a broken old row */ }\n}\n\nconst keywordRe = new RegExp('(' + watch.newsKeywords.join('|') + ')', 'i');\nconst aihot = checked.data.aihot || { hot: [], items: [], codex: null };\nconst news = [];\nconst byUrl = new Set();\nfor (const h of aihot.hot) {\n  const url = h.links && h.links.aihot;\n  if (!keywordRe.test(h.title) || byUrl.has(url)) continue;\n  byUrl.add(url);\n  // Two heat scales: the hot list counts participants, the 24-hour list has an editor score. \"list\" says which.\n  news.push({ title: h.title, url, list: 'hot', heat: h.participantCount || h.sourceCount || 0, hotRank: h.rank, isNew: !seen.has(url) });\n}\nfor (const i of aihot.items) {\n  if (!keywordRe.test(i.title + ' ' + i.summary) || byUrl.has(i.url)) continue;\n  byUrl.add(i.url);\n  news.push({ title: i.title, url: i.url, list: '24h', heat: i.score || 0, summary: i.summary, isNew: !seen.has(i.url) });\n}\nconst quietKeywords = watch.newsKeywords.filter((k) => !news.some((n) => new RegExp(k, 'i').test(n.title + ' ' + (n.summary || ''))));\n\n// The 7-day low (the user's rule, 11-01: every price is compared with the lowest price of the week before).\n// It is the lowest logged price of the 7 calendar days before today, by Paris date; today never counts.\nconst weekAgo = DateTime.fromISO(ctx.date).minus({ days: 7 }).toISODate();\nconst priceLog = $('Load price log').all().map((i) => i.json).filter((r) => r.day >= weekAgo && r.day < ctx.date);\nconst logged = (item) => priceLog.filter((r) => r.item === item).sort((a, b) => (a.day < b.day ? -1 : 1)).map((r) => r.price);\nconst vsLow = (price, low) => {\n  if (price == null || low == null) return null;\n  const pct = Math.round((Math.abs(price - low) / low) * 1000) / 10;\n  return price === low ? 'equal to the low' : pct + (price < low ? ' % below the low' : ' % above the low');\n};\n\n// Deals: the cheapest matching item per watchlist entry.\nconst parsePrice = (t) => {\n  if (!t) return null;\n  const n = Number(String(t).replace(/[^0-9,.]/g, '').replace(',', '.'));\n  return Number.isFinite(n) && n > 0 ? n : null;\n};\nconst deals = [];\nconst noDeal = [];\n// The watchlist's offers come from Dealabs and Google Shopping. An offer counts when its title matches every \"must\"\n// pattern and no \"exclude\" pattern, it is new (not used or refurbished), and its price is not under minPrice.\n// Accessories and refurbished items match product names too; dealExclude leaves them out for every item.\nconst excludeRe = new RegExp(watch.dealExclude || '^$', 'i');\n// Club or subscription prices (for example \"[Club+/Infinity]\") are not open to everyone.\nconst memberRe = new RegExp(watch.memberOnly || '^$', 'i');\nconst shop = (checked.data.shopping || {}).products || {};\nfor (const w of watch.deals) {\n  const must = (w.must || [w.pattern]).map((x) => new RegExp(x, 'i'));\n  const own = new RegExp(w.exclude || '^$', 'i');\n  const colour = w.colour ? { want: new RegExp(w.colour.want, 'i'), other: new RegExp(w.colour.other, 'i') } : null;\n  const fits = (o) => o.price != null && o.price >= (w.minPrice || 0) && !o.used && must.every((re) => re.test(o.title)) &&\n    !own.test(o.title) && !excludeRe.test(o.title) && !(colour && colour.other.test(o.title));\n  const offers = (checked.data.deals || [])\n    .map((d) => ({ title: d.title, merchant: d.merchant, price: parsePrice(d.priceText), link: d.link, from: 'Dealabs' }))\n    .concat((shop[w.label] || []).map((r) => ({ ...r, from: 'Google Shopping' })))\n    .filter(fits)\n    .sort((a, b) => a.price - b.price);\n  if (!offers.length) { noDeal.push(w.label); continue; }\n  const best = offers[0];\n  const memberOnly = memberRe.test(best.title);\n  // Only prices open to everyone are logged and count for the low; a member price can still be shown.\n  const open = offers.find((m) => !memberRe.test(m.title));\n  const before = logged(w.label);\n  const low7 = before.length ? Math.min(...before) : null;\n  deals.push({ label: w.label, title: best.title, merchant: best.merchant, price: best.price,\n    // \"from\" is where today's lowest public price was found; listPrice is the official price.\n    from: (open || best).from, listPrice: w.listPrice || null, target: w.target, underTarget: best.price < w.target, memberOnly,\n    publicPrice: open ? open.price : null, publicMerchant: open ? open.merchant : null,\n    // A member price is not compared with the low (the low has only public prices); the public price is.\n    low7, lowDays: before.length, vsLow7: vsLow(memberOnly ? (open ? open.price : null) : best.price, low7),\n    // A title without a colour, or without men's or women's, is kept and marked, never guessed.\n    note: [colour && !colour.want.test(best.title) ? 'colour not stated' : null,\n      w.gender && !new RegExp(w.gender, 'i').test(best.title) ? \"men's or women's not stated\" : null].filter(Boolean).join('; ') || null,\n    link: best.link });\n}\n\n// Codex quota, from AIHOT's reset monitor.\nconst codexEvents = (aihot.codex && aihot.codex.events) || [];\n// The label in brackets is left out when the title already says it (\"… 重置卡 (重置卡发放)\").\nconst codexLabel = codexEvents.length ? String(codexEvents[0].displayLabel || codexEvents[0].label || codexEvents[0].status || '') : '';\nconst codexSame = codexLabel && (codexEvents[0].title.includes(codexLabel) || codexEvents[0].title.includes(codexLabel.slice(0, 3)));\nconst codex = codexEvents.length\n  ? codexEvents[0].title + (codexLabel && !codexSame ? ' (' + codexLabel + ')' : '') + ', ' + String(codexEvents[0].createdAt || '').slice(0, 10) + '.'\n  : 'No Codex reset in the last days.';\n\n// Classes: today's list for the page; later days stay in the timetable table for lookup_courses.\nconst classes = checked.data.zeus;\nlet courses = null;\nif (classes) {\n  const later = classes.find((c) => c.day > ctx.date);\n  const when = later && DateTime.fromISO(later.start).setZone('Europe/Paris').setLocale('en');\n  courses = {\n    today: classes.filter((c) => c.day === ctx.date).map((c) => ({ time: c.time, title: c.title, where: c.where })),\n    next: later ? when.toFormat(when.diff($now.setZone('Europe/Paris').startOf('day'), 'days').days < 6 ? 'cccc' : 'ccc d LLL') + ', ' + later.time.slice(0, 5) + ': ' + later.title : null,\n  };\n}\n\n// Mail: newsletters and promotions are only counted. The agent sees sender, subject and a short snippet of the rest.\nconst mails = checked.data.gmail;\n// Mails with a one-time code are never sent to the agent; the page only counts them.\nconst mail = mails ? mails.filter((m) => !m.bulk && !m.code).slice(0, 20).map(({ id, from, subject, snippet, isNew }) => ({ id, from, subject, snippet, isNew })) : null;\nconst hiddenMail = mails ? mails.filter((m) => m.bulk && !m.code).length : 0;\nconst codesHidden = mails ? mails.filter((m) => m.code).length : 0;\n\n// Portfolio: the agent gets codes and percentages only (daily change, weight). Never quantities or amounts.\n// The 1-month high and low: the highest and lowest close of the 21 trading days before the last close\n// (closes 9 to 29 of 30; the last day is not in it). The page computes the same text from \"closes\".\nconst pct1 = (x) => (Math.round(x * 1000) / 10).toFixed(1);\nfunction month(closes) {\n  const last = closes[closes.length - 1];\n  const before = closes.slice(Math.max(0, closes.length - 22), closes.length - 1);\n  if (!before.length) return { high1m: null, low1m: null, vs1m: null };\n  const high = Math.max(...before);\n  const low = Math.min(...before);\n  const vs1m = last < low ? pct1((low - last) / low) + ' % under 1-month low'\n    : last > high ? pct1((last - high) / high) + ' % over 1-month high'\n    // Inside the range: say which end is nearer.\n    : (last - low) / low <= (high - last) / high ? pct1((last - low) / low) + ' % above 1-month low'\n    : pct1((high - last) / high) + ' % below 1-month high';\n  return { high1m: high, low1m: low, vs1m };\n}\nconst held = checked.data.market;\nconst market = held ? {\n  codesFrom: 'watchlist',\n  codesAre: 'a watchlist, not holdings',\n  lastClose: held.lastClose ? held.lastClose + ' (' + DateTime.fromISO(held.lastClose).setLocale('en').toFormat('cccc') + ')' : null,\n  codes: held.holdings.map((h) => ({ symbol: h.symbol, name: h.name || undefined, changePct: h.pct,\n    bigMove: Math.abs(h.pct) >= watch.marketThreshold, ...month(h.closes) })),\n  notAvailable: (held.missing || []).map((m) => m.symbol + ': ' + m.reason),\n} : null;\n\n// Travel: Christmas round-trip fares. low7 is the lowest fare of the 7 days before today:\n// Google's own history first, and our price log when Google gives none (CDG-HND).\nconst trip = checked.data.travel;\nconst travel = trip ? trip.routes.map((r) => {\n  const h = r.history || [];\n  // A copy searched before this change (11-01) stored plain fares ending with today; drop that last fare.\n  const google = typeof h[0] === 'number' ? h.slice(0, -1).slice(-7) : h.filter((x) => x.day >= weekAgo && x.day < ctx.date).map((x) => x.price);\n  const item = 'Flight CDG-' + r.code;\n  const before = google.length ? google : logged(item);\n  const low7 = before.length ? Math.min(...before) : null;\n  return { city: r.city, code: r.code, fare: r.fare, low7, lowDays: before.length,\n    lowFrom: google.length ? 'google' : before.length ? 'log' : null, vsLow7: vsLow(r.fare, low7), before,\n    typicalRange: r.typical, hotelPerNight: ((trip.hotels || {})[r.code] || {}).perNight || null, priceLogItem: item };\n}) : null;\n\nconst notConnected = checked.sources.filter((s) => s.status === 'off').map((s) => s.short);\nconst stale = checked.sources.filter((s) => s.status === 'stale').map((s) => s.short + ' (' + s.code + ')');\n\n// \"before\" (the fares behind low7) is for the page's curve; the agent gets low7 and vsLow7 instead.\nconst candidates = { date: ctx.date, weekday: $now.setZone('Europe/Paris').setLocale('en').toFormat('cccc'), courses, mail, news: news.slice(0, 12), deals, market,\n  travel: travel && travel.map(({ before, ...r }) => r), codex, notConnected, stale };\n// The prompt is written by \"Prepare agent input\", after the Chinese and French texts are translated.\nreturn [{ json: { candidates, courses, mail, hiddenMail, codesHidden, travel, quietKeywords, noDeal, codex } }];\n"
+      },
+      "notes": "Plain rules: keyword match, cheapest deal per watchlist item, news already seen yesterday."
+    },
+    {
+      "id": "5f581d7c-8522-52fc-9cd8-6ca376c8e40e",
+      "name": "Text to translate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3240,
+        180
+      ],
+      "parameters": {
+        "jsCode": "// The page is in English (the user's rule, 11-01). The Chinese and French texts it will show are collected here:\n// news titles, the Codex line, deal titles, mail subjects and class titles. Only these few go to the model.\n// Mails with a one-time code were already left out by \"Check sources and use cache\".\nconst picked = $('Pick candidates').first().json;\nconst c = picked.candidates;\nconst foreign = (s) => /[㐀-鿿＀-￯]/.test(s) || /[àâçéèêëîïôûùüÿœæ]/i.test(s) ||\n  /\\b(le|la|les|des|du|au|aux|pour|avec|votre|vos|sur|une|et|est|pas|dans|par|nouveau|nouvelle|homme|femme|veste|noir|noire|blanc|taille|commande|cours|salle|examen|rappel|bienvenue)\\b/i.test(s);\nconst strings = new Set();\nconst add = (s) => { if (typeof s === 'string' && s.trim() && foreign(s)) strings.add(s); };\nfor (const n of c.news || []) add(n.title);\nadd(c.codex);\nfor (const d of c.deals || []) add(d.title);\nfor (const m of c.mail || []) add(m.subject);\nif (c.courses) {\n  for (const x of c.courses.today || []) add(x.title);\n  add(c.courses.next);\n}\nreturn [{ json: { strings: [...strings] } }];\n"
+      },
+      "notes": "The Chinese and French texts the page will show: news titles, Codex line, deal titles, mail subjects, classes."
+    },
+    {
+      "id": "6cd0a86a-cd62-57d9-b49d-8e4c62e05698",
+      "name": "Anything to translate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3360,
+        180
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.strings.length > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "a2a36cb2-e6ca-55bb-a712-0046b774cafc",
+      "name": "Translate to English",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        3480,
+        180
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.strings.map((s, k) => (k + 1) + '. ' + s.replace(/[{}]/g, ' ').replace(/\\s+/g, ' ')).join('\\n') }}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessagePromptTemplate",
+              "message": "You translate short texts for an English morning briefing page. You get numbered lines in Chinese, French or English.\nTranslate each line into short, natural English.\nKeep exactly as written: names of people, companies, brands and product models, merchants, accounts and room codes, and every number with its digits. Only Chinese amounts in 万 or 亿 may change form, for example 200 亿美元 becomes $20 billion and 1.25 万亿 becomes 1.25 trillion.\nIn a product title, translate the describing words around the brand and model, for example Écran becomes Display, To becomes TB, Go becomes GB, Puce becomes chip, cœurs becomes cores, Noir sidéral becomes Space Black, Veste becomes Jacket and Homme becomes Men's.\nA line that is already English stays unchanged. Do not add, explain or leave out anything.\nAnswer with the same numbered lines, one per line, in the same order, and nothing else."
+            }
+          ]
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "notes": "One model call translates every Chinese and French text the page shows. A failed call keeps the originals."
+    },
+    {
+      "id": "f1a3e0d3-1c00-54ae-b17b-7e699dda14b3",
+      "name": "Claude Haiku 5.5 (translate)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        3480,
+        340
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-haiku-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 4096,
+          "thinkingMode": "disabled"
+        }
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "YOUR_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic (own)"
+        }
+      },
+      "notes": "Used only to translate."
+    },
+    {
+      "id": "8a759b9f-8833-597a-a558-9c5b317fcf7b",
+      "name": "English text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3600,
+        180
+      ],
+      "parameters": {
+        "jsCode": "// Each translation is checked before it is used: one numbered line per text, no Chinese left, and every number\n// of the original still in it (Chinese amounts in 万/亿 and dates such as 12月 may change form).\n// A text that fails keeps its original wording; a failed call keeps them all. The run never stops here.\nconst asked = $('Text to translate').first().json.strings;\nconst out = $('Translate to English').first().json || {};\nconst lines = {};\nfor (const l of String(out.text || '').split('\\n')) {\n  const m = l.match(/^\\s*(\\d+)[.)]\\s+(.+?)\\s*$/);\n  if (m) lines[Number(m[1])] = m[2];\n}\nconst digits = (s) => String(s).replace(/\\D/g, '');\nconst map = {};\nlet kept = 0;\nasked.forEach((orig, k) => {\n  const t = lines[k + 1];\n  const have = digits(t || '');\n  const needed = [...String(orig).matchAll(/\\d+(?:[.,]\\d+)*(?=\\s*([万亿千百月日号年时点分秒])?)/g)].filter((m) => !m[1]).map((m) => digits(m[0]));\n  if (!t || /[㐀-鿿]/.test(t) || needed.some((n) => !have.includes(n))) { kept += 1; return; }\n  map[orig] = t;\n});\nconst error = out.error ? String(out.error.message || out.error).slice(0, 80) : null;\nreturn [{ json: { map, summary: { asked: asked.length, translated: Object.keys(map).length, kept, error } } }];\n"
+      },
+      "notes": "Checks each translation: one line per text, no Chinese left, every number kept. Otherwise the original stays."
+    },
+    {
+      "id": "ac838f71-9764-5bae-b532-1ecc20f61bb6",
+      "name": "Prepare agent input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3560,
+        40
+      ],
+      "parameters": {
+        "jsCode": "// The agent and the page see English: the checked translations replace the Chinese and French texts that\n// \"Pick candidates\" chose. The original wording is kept beside them (titleOriginal, subjectOriginal).\nconst ctx = $('Run context').first().json;\nconst picked = $('Pick candidates').first().json;\nconst ran = (n) => { try { return $(n).isExecuted; } catch (e) { return false; } };\nconst tr = ran('English text') ? $('English text').first().json : { map: {}, summary: null };\nconst en = (s) => (typeof s === 'string' && tr.map[s]) || s;\nconst c = JSON.parse(JSON.stringify(picked.candidates));\nc.news = (c.news || []).map((n) => (en(n.title) !== n.title ? { ...n, title: en(n.title), titleOriginal: n.title } : n));\nc.deals = (c.deals || []).map((d) => (en(d.title) !== d.title ? { ...d, title: en(d.title), titleOriginal: d.title } : d));\nif (c.mail) c.mail = c.mail.map((m) => (en(m.subject) !== m.subject ? { ...m, subject: en(m.subject), subjectOriginal: m.subject } : m));\nif (c.courses) c.courses = { ...c.courses, today: (c.courses.today || []).map((x) => ({ ...x, title: en(x.title) })), next: en(c.courses.next) };\nc.codex = en(c.codex);\n// The agent gets only the English texts: an original beside them could end up as a pick's ref key.\n// It does not get the deals: Today's five never comes from Deals (the user's rule, 11-02). The page still lists them.\nconst { deals, ...agentCandidates } = c;\nconst forAgent = JSON.stringify(agentCandidates, (k, v) => (k === 'titleOriginal' || k === 'subjectOriginal' ? undefined : v), 1);\nconst prompt = `Today is ${ctx.date} in Paris. Choose today's picks from these candidates.\n\nCandidates (JSON):\n${forAgent}`;\nreturn [{ json: { ...picked, prompt, candidates: c, courses: c.courses, mail: c.mail, codex: c.codex, translation: tr.summary } }];\n"
+      },
+      "notes": "Puts the English texts into the candidates (originals kept beside them) and writes the agent's prompt."
+    },
+    {
+      "id": "d6c8365f-e1a5-55a4-94a7-93d40e53b442",
+      "name": "Price rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3680,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Log today's best price per watchlist item, so get_price_history can compare across days.\nconst ctx = $('Run context').first().json;\n// Flights are logged too (\"Flight CDG-HND\"), so the agent can compare a fare with earlier days.\nconst input = $('Prepare agent input').first().json;\n// Only prices open to everyone are logged, so a member price never becomes the 7-day low.\nreturn input.candidates.deals.filter((d) => d.publicPrice != null || !d.memberOnly)\n  .map((d) => ({ json: { item: d.label, day: ctx.date, price: d.memberOnly ? d.publicPrice : d.price, source: d.memberOnly ? d.publicMerchant : d.merchant } }))\n  .concat((input.travel || []).filter((r) => r.fare).map((r) => ({ json: { item: r.priceLogItem, day: ctx.date, price: r.fare, source: 'Google Flights' } })));\n"
+      }
+    },
+    {
+      "id": "7a93e566-0b27-526c-ae92-f3b491bee630",
+      "name": "Save today's prices",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3880,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_PRICE_HISTORY_TABLE_ID",
+          "cachedResultName": "price_history"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "item",
+              "condition": "eq",
+              "keyValue": "={{ $json.item }}"
+            },
+            {
+              "keyName": "day",
+              "condition": "eq",
+              "keyValue": "={{ $json.day }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "e9ebd7c0-c4ba-5728-8d56-d49ef60244fa",
+      "name": "Editor agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        3680,
+        40
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the editor of a one-page morning briefing for Song Haojie, an engineering student in Paris.\nFrom the candidates, choose the 5 picks that matter most to the user today. Take them from AI news, Mail, Portfolio and Travel; today's classes can support a pick. Shopping is never one of the 5, so the candidates have no deals. There is big AI news most days, so 2 or 3 of the 5 come from AI news when the candidates have enough of it. Keep a place for a mail that needs action today and for a fare below its 7-day low. Mark a pick \"act\" only when it needs an action today, for example a mail that asks for a reply today. Otherwise mark it \"know\".\nCompare every fare with its 7-day low. \"low7\" is the lowest price of the 7 days before today (today never counts), \"lowDays\" is how many of those days have a price, and \"vsLow7\" is the comparison, already computed: copy it, do not compute your own. When lowDays is under 7, write \"N-day low\" (for example \"3-day low\"); when low7 is null, write \"no 7-day low yet\". In a title, write the comparison with the low, for example \"Tokyo round trip at €812, 3.1 % below its 7-day low\".\nBefore you rank a news item that is not already a top story, you may call search_ai_news with one keyword to look for follow-ups or context. Skip the tool when it adds nothing.\nToday's classes are in the candidates. When a pick depends on another date (a deadline, a sale day, an event), call lookup_courses with that date to check whether it clashes with a class.\nSort every mail candidate into \"mail\": need \"act\" when it asks the reader to do something soon (confirm, reply, book, pay), otherwise \"later\". Add \"deadline\" as a short date such as \"Fri 6 Nov\" only when the mail states one. A mail can also be a pick; its ref key is the exact subject. Mails with \"isNew\": false were already seen in the last run.\nMarket: 8 codes from the user's watchlist (\"codesAre\"); they are not holdings, so never call them holdings or \"your\" stocks. You see each code with its change at the last close, never amounts. The change is from the trading day in \"lastClose\": when that is not today, write \"on Friday\" (its weekday) or \"at the last close\", never \"today\". A code is a ticker, and \"name\" is the company or the index. \"vs1m\" compares the last close with the highest and lowest close of the 21 trading days before it, already computed: in a market pick, copy it as it is, never compute your own. Give at most 2 market picks, only for codes with \"bigMove\": true, the biggest moves first; call search_ai_news with the company name to look for a reason. Never give buy or sell advice.\nTravel: Christmas round-trip fares from Paris, compared with \"low7\" and \"vsLow7\" in the same way (\"lowFrom\": \"google\" is the daily history from Google Flights, \"log\" is our own daily log). A fare below its low is worth a pick; call get_price_history with its \"priceLogItem\" to see the logged fares.\nReport each pick honestly. \"tool\" is the tool you called for this pick, or \"none\". \"result\" is what the tool returned, in one sentence. The workflow records the exact call itself from n8n's execution log.\nUse only facts from the candidates and the tool results. Never invent a URL, a price or a number.\n\"from\" lists the blocks the pick relies on, using only these names: \"AI news\", \"Courses\", \"Mail\", \"Portfolio\", \"Travel\".\n\"ref\" points to the item: {\"block\": \"ai\", \"mail\", \"market\" or \"travel\", \"key\": the exact candidate title, the mail subject, the stock code or the airport code}.\nGive every pick a \"key\": a short phrase copied exactly from your title, such as a price, a date or a name; the page highlights it.\nTitles are plain English, at most 12 words.\nCall the tools you need first. Call format_final_json_response only once, as your last step, after you have every tool result.\nIn format_final_json_response, \"output\" is a JSON object, never a string. Every pick has at least kind, title, ref, tool and why. Give 5 picks.",
+          "maxIterations": 10,
+          "returnIntermediateSteps": true
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "onError": "continueErrorOutput",
+      "notes": "Decides the five picks and which check each candidate needs. Retries once if the answer has the wrong format."
+    },
+    {
+      "id": "59f1dcde-db11-5807-96bd-d778b454d3e3",
+      "name": "Claude Haiku 5.5",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        3560,
+        300
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-haiku-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 8192,
+          "thinkingMode": "disabled"
+        }
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "YOUR_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic (own)"
+        }
+      },
+      "notes": "My own Anthropic key (credential Anthropic (own)), with a spend limit set in the Anthropic Console."
+    },
+    {
+      "id": "03c169da-68b1-5506-af8f-f51b67720b6b",
+      "name": "search_ai_news",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        3700,
+        300
+      ],
+      "parameters": {
+        "toolDescription": "Search AI and tech news from the last 24 hours on AIHOT. Input: one keyword such as a company or product name. Returns up to 5 items with title and summary.",
+        "url": "https://aihot.news/api/v1/items",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $fromAI('keyword', 'One company, product or topic name, for example Tesla', 'string') }}"
+            },
+            {
+              "name": "window",
+              "value": "24h"
+            },
+            {
+              "name": "limit",
+              "value": "5"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "aihot-api/2.0.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      }
+    },
+    {
+      "id": "9772e7f8-1d1f-575d-be4d-1bb79265385f",
+      "name": "get_price_history",
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        3840,
+        300
+      ],
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Return the logged daily prices for one item, newest first. Each row is the lowest price found that day and the merchant that had it (source); the merchant can change from one day to the next. Input: a flight such as Flight CDG-HND.",
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_PRICE_HISTORY_TABLE_ID",
+          "cachedResultName": "price_history"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "item",
+              "condition": "eq",
+              "keyValue": "={{ $fromAI('item', 'Watchlist label or flight, for example AirPods or Flight CDG-HND', 'string') }}"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 30,
+        "orderBy": true,
+        "orderByColumn": "day",
+        "orderByDirection": "DESC"
+      }
+    },
+    {
+      "id": "4b78114a-ce9d-5063-9d98-2525c6ffd970",
+      "name": "lookup_courses",
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        4120,
+        460
+      ],
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Return the classes on one date from the Zeus timetable. Input: the date as yyyy-MM-dd. The classes field is a JSON list of {time, title, where}; an empty list means no class that day. No row means the date is outside the next 14 days.",
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_TIMETABLE_TABLE_ID",
+          "cachedResultName": "timetable"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "day",
+              "condition": "eq",
+              "keyValue": "={{ $fromAI('date', 'The date to check, as yyyy-MM-dd, for example 2026-11-03', 'string') }}"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1
+      }
+    },
+    {
+      "id": "ecff6af0-08c6-597c-a099-0743fa991926",
+      "name": "Picks format",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        3980,
+        300
+      ],
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n \"type\": \"object\",\n \"properties\": {\n  \"picks\": {\n   \"type\": \"array\",\n   \"items\": {\n    \"type\": \"object\",\n    \"properties\": {\n     \"kind\": {\n      \"type\": \"string\",\n      \"enum\": [\n       \"act\",\n       \"know\"\n      ],\n      \"description\": \"act: needs an action today; know: worth knowing\"\n     },\n     \"title\": {\n      \"type\": \"string\",\n      \"description\": \"Plain English, at most 12 words\"\n     },\n     \"key\": {\n      \"type\": \"string\",\n      \"description\": \"A short phrase copied exactly from title, such as a price or a date\"\n     },\n     \"from\": {\n      \"type\": \"array\",\n      \"items\": {\n       \"type\": \"string\"\n      },\n      \"description\": \"Blocks the pick relies on\"\n     },\n     \"ref\": {\n      \"type\": \"object\",\n      \"properties\": {\n       \"block\": {\n        \"type\": \"string\",\n        \"enum\": [\n         \"ai\",\n         \"deals\",\n         \"mail\",\n         \"market\",\n         \"travel\"\n        ]\n       },\n       \"key\": {\n        \"type\": \"string\",\n        \"description\": \"The exact candidate title, mail subject, stock code or airport code\"\n       }\n      },\n      \"required\": [\n       \"block\",\n       \"key\"\n      ]\n     },\n     \"tool\": {\n      \"type\": \"string\",\n      \"description\": \"search_ai_news, get_price_history, lookup_courses or none\"\n     },\n     \"why\": {\n      \"type\": \"string\",\n      \"description\": \"One sentence: why it matters today\"\n     },\n     \"input\": {\n      \"type\": \"string\",\n      \"description\": \"The candidate facts this pick starts from\"\n     },\n     \"result\": {\n      \"type\": \"string\",\n      \"description\": \"What the tool returned, in one sentence\"\n     },\n     \"decision\": {\n      \"type\": \"string\",\n      \"description\": \"What you decided from it\"\n     }\n    },\n    \"required\": [\n     \"kind\",\n     \"title\",\n     \"ref\",\n     \"tool\",\n     \"why\"\n    ]\n   }\n  },\n  \"mail\": {\n   \"type\": \"array\",\n   \"items\": {\n    \"type\": \"object\",\n    \"properties\": {\n     \"id\": {\n      \"type\": \"string\"\n     },\n     \"need\": {\n      \"type\": \"string\",\n      \"enum\": [\n       \"act\",\n       \"later\"\n      ]\n     },\n     \"deadline\": {\n      \"type\": \"string\"\n     }\n    },\n    \"required\": [\n     \"id\",\n     \"need\"\n    ]\n   }\n  }\n },\n \"required\": [\n  \"picks\"\n ]\n}",
+        "autoFix": true
+      },
+      "notes": "Checks the agent's answer against the picks schema. Wrong format: one repair call, then the agent retries."
+    },
+    {
+      "id": "8e554cbe-688f-5c69-acc3-d55f9fc5a6c4",
+      "name": "Claude Haiku 5.5 (fix format)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        3980,
+        460
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-haiku-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 8192,
+          "thinkingMode": "disabled"
+        }
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "YOUR_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic (own)"
+        }
+      },
+      "notes": "Used only when the answer's format is wrong."
+    },
+    {
+      "id": "816ed1d7-b73f-50ad-bafc-0c0497c443ab",
+      "name": "Has picks?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4280,
+        40
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ ((($json.output || {}).picks) || ((($json.output || {}).output || {}).picks) || []).length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "996a926c-fd08-5f6d-a252-cd61b9f16f43",
+      "name": "Assemble EDITION",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4480,
+        -60
+      ],
+      "parameters": {
+        "jsCode": "// Build the EDITION object the page reads (fields: CONTRACT.md section 3).\nconst ctx = $('Run context').first().json;\nconst checked = $('Check sources and use cache').first().json;\nconst input = $('Prepare agent input').first().json;\nconst today = $(\"Load today's edition\").first().json;\nconst agentRun = $('Editor agent').first().json;\nconst parsed = (agentRun.output && agentRun.output.picks) ? agentRun.output : ((agentRun.output || {}).output || {});\n\nconst previous = today && today.edition ? JSON.parse(today.edition) : null;\nconst version = (today && today.version ? Number(today.version) : 0) + 1;\nconst how = ctx.reason === 'page-open' ? 'opening the page after a missed 08:00 run'\n  : ctx.trigger === 'rebuild' ? 'a manual rebuild' : 'the 08:00 schedule';\nconst now = $now.setZone('Europe/Paris').setLocale('en');\n\n// The agent names the tool it used for each pick. \"call\" comes from the tool calls n8n actually ran,\n// and a tool the agent names but never called is shown as no tool call.\n// format_final_json_response is how n8n's output parser receives the answer, not a check, so it is left out.\nconst steps = (agentRun.intermediateSteps || [])\n  .map((s) => ({ tool: (s.action || {}).tool, args: (s.action || {}).toolInput, used: false }))\n  .filter((s) => s.tool !== 'format_final_json_response');\nconst argText = (a) => (a && typeof a === 'object' ? Object.values(a).filter((v) => typeof v !== 'object').join(' ') : String(a || ''));\nconst showCall = (s) => s.tool + '(' + JSON.stringify(s.args && typeof s.args === 'object' ? s.args : { input: s.args }) + ')';\nconst unverified = [];\nconst guarded = [];\nconst BLOCK_NAMES = { ai: 'AI news', deals: 'Deals', mail: 'Mail', market: 'Portfolio', travel: 'Travel' };\n// The user's rule (11-02): Today's five never comes from Deals (it replaces the 11-01 rule \"at most one deal, last\").\n// The agent does not see the deals, and a deal pick is still dropped here. The Deals block lists every deal as before.\nconst proposed = parsed.picks || [];\nconst isDeal = (p) => (p.ref || {}).block === 'deals';\nconst dealsLeftOut = proposed.filter(isDeal).length;\nif (dealsLeftOut) {\n  guarded.push('Rule applied: Today\\'s five never comes from Deals; ' + dealsLeftOut + ' deal pick' + (dealsLeftOut > 1 ? 's' : '') +\n    ' left out (still in the Deals block)');\n}\nconst ordered = proposed.filter((p) => !isDeal(p)).slice(0, 5);\nconst picks = ordered.map((p) => {\n  const claimed = p.tool && p.tool !== 'none' ? p.tool : null;\n  const pick = {\n    kind: p.kind === 'act' ? 'act' : 'know',\n    title: p.title,\n    // The page highlights key inside the title, so a key that is not in the title is dropped.\n    key: p.key && String(p.title || '').includes(p.key) ? p.key : undefined,\n    // Optional fields get defaults, so a short answer from the agent still renders.\n    from: Array.isArray(p.from) && p.from.length ? p.from : [BLOCK_NAMES[(p.ref || {}).block]].filter(Boolean),\n    ref: p.ref && p.ref.block ? p.ref : undefined,\n    tool: claimed,\n    input: p.input || p.title,\n    why: p.why || p.decision || '',\n    call: 'No tool call.',\n    result: claimed ? p.result || 'Not stated.' : '—',\n    decision: p.decision || p.why || '',\n  };\n  if (!claimed) return pick;\n  // Only a call whose arguments appear in this pick counts (an item label, a keyword or a date).\n  // A call of the same tool with other arguments is never borrowed for this pick.\n  // A market pick also counts its company name: the agent searches news by name (\"Interactive Brokers\" for IBKR).\n  const holding = ((checked.data.market || {}).holdings || []).find((h) => (p.ref || {}).block === 'market' &&\n    h.symbol === String(p.ref.key || '').toUpperCase());\n  const text = [p.title, p.input, p.ref && p.ref.key, holding && holding.name].join(' ').toLowerCase();\n  const same = steps.filter((s) => s.tool === claimed && !s.used);\n  // A call counts when its argument appears in the pick, or the pick's code appears in the argument (\"Flight CDG-ZRH\" for ZRH).\n  const code = String((p.ref && p.ref.key) || '').toLowerCase();\n  const match = same.find((s) => argText(s.args) && (text.includes(argText(s.args).toLowerCase()) ||\n    (code.length >= 3 && argText(s.args).toLowerCase().includes(code))));\n  if (match) {\n    match.used = true;\n    pick.call = showCall(match);\n  } else {\n    unverified.push('Editor agent named ' + claimed + ' for \"' + p.title + '\", but ' +\n      (same.length ? 'it was called with other arguments' : 'never called it') + '; shown as no tool call');\n    Object.assign(pick, { tool: null, call: 'No tool call.', result: '—' });\n  }\n  return pick;\n});\nconst toolCalls = steps.length;\n\nconst c = input.candidates;\nconst watch = $('My watchlist').first().json;\n// The page finds a pick's row by ref.key, so the key must be the row's exact title or code.\n// The agent sometimes writes a short form (\"AirPods\" for a long Dealabs title); map it to the row.\nconst norm = (t) => String(t || '').toLowerCase().trim();\nfor (const pick of picks) {\n  const ref = pick.ref;\n  if (!ref) continue;\n  const k = norm(ref.key);\n  if (ref.block === 'ai') {\n    const n = c.news.find((x) => norm(x.title) === k || norm(x.url) === k) || c.news.find((x) => k && norm(x.title).includes(k));\n    if (n) ref.key = n.title;\n  } else if (ref.block === 'mail') {\n    const m = (input.mail || []).find((x) => norm(x.subject) === k) || (input.mail || []).find((x) => k && norm(x.subject).includes(k));\n    if (m) ref.key = m.subject;\n  } else if (ref.block === 'market' || ref.block === 'travel') {\n    ref.key = String(ref.key || '').toUpperCase();\n  }\n}\n\n// Picks the workflow makes itself, from candidates the agent did not pick. They are \"know\" and have no tool.\nconst taken = new Set(picks.filter((p) => p.ref).map((p) => p.ref.block + ':' + norm(p.ref.key)));\nconst codes = ((c.market || {}).codes || []).slice().sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct));\nconst freshNews = (c.news || []).filter((n) => !taken.has('ai:' + norm(n.title)));\nconst made = (x, why) => {\n  taken.add(x.block + ':' + norm(x.key));\n  return { kind: 'know', title: x.title, key: undefined, from: [x.from], ref: { block: x.block, key: x.key }, tool: null,\n    input: x.title, why, call: 'No tool call.', result: '—', decision: why };\n};\nconst newsPick = (n) => ({ block: 'ai', key: n.title, from: 'AI news', title: n.title });\nconst marketPick = (m) => ({ block: 'market', key: m.symbol, from: 'Portfolio',\n  title: m.symbol + ' ' + (m.changePct < 0 ? 'fell ' : 'rose ') + Math.abs(m.changePct) + ' % at the last close' + (m.vs1m ? ', ' + m.vs1m : '') });\n\n// The user's rule (11-02): more AI news in the five, since there is big AI news most days. At least 2 AI news picks\n// and at most 2 market picks: the weakest market pick that is not \"act\" (the smallest move) gives its place,\n// in the same position, to the first AI news the agent did not pick.\nconst count = (block) => picks.filter((p) => (p.ref || {}).block === block).length;\nconst moveOf = (p) => Math.abs((codes.find((m) => m.symbol === p.ref.key) || {}).changePct || 0);\nconst swapped = [];\nwhile ((count('ai') < 2 || count('market') > 2) && freshNews.length) {\n  const weakest = picks.filter((p) => (p.ref || {}).block === 'market' && p.kind !== 'act').sort((a, b) => moveOf(a) - moveOf(b))[0];\n  if (!weakest) break;\n  picks[picks.indexOf(weakest)] = made(newsPick(freshNews.shift()),\n    'Added by the workflow: Today\\'s five has at least 2 AI news, so this took the place of ' + weakest.ref.key + '.');\n  swapped.push(weakest.ref.key);\n}\nif (swapped.length) {\n  guarded.push('Rule applied: at least 2 AI news and at most 2 market picks in Today\\'s five; ' + swapped.join(', ') +\n    (swapped.length > 1 ? ' were' : ' was') + ' replaced by AI news');\n}\n\n// Today's five is still five picks (the user's rule, 11-02). When the agent gives fewer, the workflow adds candidates\n// it did not pick: the AI news in candidate order first, then the big market moves, then the other codes by size of move.\nconst added = [];\nif (picks.length < 5) {\n  const given = picks.length;\n  const pool = freshNews.map(newsPick).concat(codes.filter((m) => m.bigMove).map(marketPick))\n    .concat(codes.filter((m) => !m.bigMove).map(marketPick));\n  for (const x of pool) {\n    if (picks.length >= 5) break;\n    if (taken.has(x.block + ':' + norm(x.key))) continue;\n    picks.push(made(x, 'Added by the workflow: the agent gave ' + given + ' pick' + (given === 1 ? '' : 's') + ' and Today\\'s five has 5.'));\n    added.push(x.key);\n  }\n  if (added.length) {\n    guarded.push('Rule applied: Today\\'s five has 5 picks; the agent gave ' + given + ', so ' + added.length + ' ' +\n      (added.length > 1 ? 'were' : 'was') + ' added from the candidates (' + added.join('; ') + ')');\n  }\n}\n\n// Holdings or watchlist: the agent once called an IBKR holding \"on a watchlist\". The page data decides the word.\nconst held = checked.data.market;\nif (held) {\n  for (const pick of picks) {\n    if (!(pick.ref && pick.ref.block === 'market') && !pick.from.includes('Portfolio')) continue;\n    const wrong = held.codesFrom === 'ibkr' ? /watch\\s?list/i : /\\b(your|my)\\s+(holdings?|portfolio|positions?|stocks?|shares?)\\b/i;\n    if (![pick.title, pick.why, pick.decision].some((t) => wrong.test(String(t || '')))) continue;\n    const h = held.holdings.find((x) => x.symbol === String((pick.ref || {}).key || '').toUpperCase()) || held.holdings[0];\n    const what = held.codesFrom === 'ibkr' ? 'one of your holdings (' + h.weightPct + ' % of the portfolio)' : 'on your watchlist (not a holding)';\n    for (const f of ['title', 'why', 'decision']) {\n      if (wrong.test(String(pick[f] || ''))) pick[f] = f === 'title' ? h.symbol + ' ' + (h.pct < 0 ? 'fell ' : 'rose ') + Math.abs(h.pct) + ' % at the last close' : h.symbol + ' is ' + what + '.';\n    }\n    guarded.push('Rule applied: ' + h.symbol + ' comes from ' + (held.codesFrom === 'ibkr' ? 'IBKR, so it is called a holding' : 'the watchlist, so it is not called a holding'));\n  }\n}\n\n// A low from fewer than 7 days is an \"N-day low\" (the agent wrote \"7-day low\" for a 6-day low in execution 369).\nconst sevenDay = /\\b(?:7|seven)[- ]day low\\b/i;\nfor (const pick of picks) {\n  const ref = pick.ref || {};\n  const row = ref.block === 'travel' ? (input.travel || []).find((r) => r.code === ref.key) : null;\n  if (!row || !(row.lowDays > 0 && row.lowDays < 7)) continue;\n  const fields = ['title', 'why', 'decision'].filter((f) => sevenDay.test(String(pick[f] || '')));\n  for (const f of fields) pick[f] = String(pick[f]).replace(new RegExp(sevenDay.source, 'gi'), row.lowDays + '-day low');\n  if (fields.length) guarded.push('Rule applied: ' + row.code + ' has ' + row.lowDays + ' days of prices, so \"7-day low\" is written \"' + row.lowDays + '-day low\"');\n}\n\n// The page highlights key in the title. Claude Haiku 5.5 rarely gives one (none in executions 295–338),\n// so a missing key is taken from the title: a price, a percent, the item's name, a date, then any number.\nconst inTitle = (title, word) => {\n  const i = word ? title.toLowerCase().indexOf(String(word).toLowerCase()) : -1;\n  return i < 0 ? null : title.slice(i, i + String(word).length);\n};\nlet keysSet = 0;\nfor (const pick of picks) {\n  if (pick.key && String(pick.title || '').includes(pick.key)) continue;\n  const title = String(pick.title || '');\n  const ref = pick.ref || {};\n  const names = [ref.block === 'market' || ref.block === 'travel' ? ref.key : null]\n    .concat(ref.block === 'ai' ? watch.newsKeywords || [] : []);\n  const found = (title.match(/[€$£]\\s?\\d+(?:[.,]\\d+)*|\\d+(?:[.,]\\d+)*\\s?(?:€|EUR|USD)/) || [])[0] ||\n    (title.match(/[+\\-−]?\\d+(?:[.,]\\d+)?\\s?%/) || [])[0] ||\n    names.map((n) => inTitle(title, n)).find(Boolean) ||\n    (title.match(/\\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*\\.?\\s+\\d{1,2}(?:\\s+[A-Z][a-z]{2,8})?|\\b\\d{1,2}\\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*/) || [])[0] ||\n    (title.match(/\\d+(?:[.,]\\d+)*/) || [])[0];\n  if (found) {\n    pick.key = found;\n    keysSet += 1;\n  }\n}\n\n// The agent sorts each mail into \"act\" (needs you soon) or \"later\". A mail it skipped counts as \"later\".\nfunction mailBlock(mails, sorted, hidden) {\n  const byId = {};\n  for (const m of sorted) byId[m.id] = m;\n  const act = [];\n  const later = [];\n  for (const m of mails) {\n    const s = byId[m.id];\n    if (s && s.need === 'act') act.push({ from: m.from, subject: m.subject, deadline: s.deadline || null, isNew: m.isNew });\n    else later.push({ from: m.from, subject: m.subject, isNew: m.isNew });\n  }\n  return { act, later, hidden };\n}\nconst blackFriday = $now.setZone('Europe/Paris').set({ year: 2026, month: 11, day: 27 }).startOf('day');\nconst edition = {\n  mode: 'live',\n  date: ctx.date,\n  day: now.day,\n  weekday: now.toFormat('cccc'),\n  monthYear: now.toFormat('LLLL yyyy'),\n  builtAt: ctx.time,\n  demoNote: null,\n  version,\n  history: ((previous && previous.history) || []).concat([{ v: version, time: ctx.time, how }]),\n  log: checked.log.concat([\n    ...(input.translation && input.translation.asked ? [{ t: now.toFormat('HH:mm:ss'), msg: 'Translated to English: ' + input.translation.translated + ' of ' +\n      input.translation.asked + ' texts' + (input.translation.error ? ' (call failed: ' + input.translation.error + ')' : '') +\n      (input.translation.kept ? '; ' + input.translation.kept + ' kept in the original language (check failed)' : ''), ...(input.translation.kept ? { bad: true } : {}) }] : []),\n    { t: now.toFormat('HH:mm:ss'), msg: 'Editor agent: ' + picks.length + ' picks' +\n      (proposed.length > 5 ? ' (' + proposed.length + ' proposed, 5 kept)' : '') + ', ' + toolCalls + ' tool calls' +\n      (keysSet ? '; highlight word taken from the title for ' + keysSet + ' pick' + (keysSet > 1 ? 's' : '') : '') },\n    ...unverified.concat(guarded).map((msg) => ({ t: now.toFormat('HH:mm:ss'), msg, bad: true })),\n    { t: now.toFormat('HH:mm:ss'), msg: 'Edition ' + ctx.date + (version > 1 ? ' replaced: v' + (version - 1) + ' to v' + version + ', still 1 row' : ' saved as a new row') },\n  ]),\n  sources: checked.sources,\n  picks,\n  courses: input.courses,\n  // codesHidden: mails with a one-time code, only counted (\"1 verification code hidden\").\n  mail: input.mail ? { ...mailBlock(input.mail, parsed.mail || [], input.hiddenMail), codesHidden: input.codesHidden || 0 } : null,\n  // Portfolio on the page: codes, daily change in % and price candles. No quantities or amounts.\n  market: checked.data.market ? {\n    holdings: checked.data.market.holdings.map((h) => ({ symbol: h.symbol, name: h.name || null, pct: h.pct, closes: h.closes, ohlc: h.ohlc })),\n    // A watchlist code Twelve Data gave no candles for, with the reason (the other codes are shown as usual).\n    missing: checked.data.market.missing || [],\n    threshold: watch.marketThreshold,\n    event: null,\n    // Always \"watchlist\" since 11-01: the codes come from My watchlist; the IBKR position is not shown.\n    codesFrom: 'watchlist',\n    // The trading day of the newest close (a Friday on a weekend), so the page does not say \"today\".\n    lastClose: checked.data.market.lastClose || null,\n  } : null,\n  travel: checked.data.travel ? {\n    dates: checked.data.travel.dates,\n    routes: input.travel.map((r) => {\n      return { city: r.city, code: r.code, fare: r.fare, low7: r.low7, lowDays: r.lowDays, lowFrom: r.lowFrom, hotel: r.hotelPerNight,\n        // Up to 8 points: the days behind low7, then today's fare (the last point is today), so the low is on the curve.\n        series: (r.before || []).concat([r.fare]).filter((n) => n != null) };\n    }),\n    quota: checked.data.travel.usage ? 'SerpApi this month: ' + checked.data.travel.usage.used + ' of ' + checked.data.travel.usage.of + ' searches.' : null,\n  } : null,\n  ai: checked.data.aihot ? {\n    hotCount: (checked.data.aihot.hot || []).length,\n    watch: c.news.slice(0, 8).map((n) => ({ title: n.title, titleOriginal: n.titleOriginal, heat: n.heat, list: n.list, url: n.url, isNew: n.isNew })),\n    empty: input.quietKeywords.length ? input.quietKeywords.join(', ') + ': nothing in the last 24 hours.' : '',\n    codex: input.codex,\n  } : null,\n  deals: checked.data.deals ? {\n    daysToBlackFriday: Math.max(0, Math.ceil(blackFriday.diff(now.startOf('day'), 'days').days)),\n    // low7 has only prices open to everyone, so a member-price row is compared through publicPrice (null: none today).\n    rows: c.deals.map((d) => ({ item: d.title, label: d.label, merchant: d.merchant, price: d.price, target: d.target, memberOnly: d.memberOnly,\n      publicPrice: d.publicPrice, low7: d.low7, lowDays: d.lowDays, listPrice: d.listPrice, from: d.from, note: d.note, link: d.link })),\n    empty: input.noDeal.length ? input.noDeal.join(', ') + ': no price today in Dealabs or Google Shopping.' : '',\n  } : null,\n};\n\nreturn [{ json: { date: ctx.date, version, updated_at: $now.toISO(), edition: JSON.stringify(edition) } }];\n"
+      }
+    },
+    {
+      "id": "10154994-0fe9-5fc4-b19d-67fa44ab19e1",
+      "name": "Save edition (upsert by date)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4680,
+        -60
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_EDITIONS_TABLE_ID",
+          "cachedResultName": "editions"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "date",
+              "condition": "eq",
+              "keyValue": "={{ $json.date }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null
+        },
+        "options": {}
+      },
+      "notes": "Upsert by date: running twice still leaves one row for today."
+    },
+    {
+      "id": "010e55e5-9a23-555a-a164-8108e4afc246",
+      "name": "Started by Rebuild?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4880,
+        -60
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $('Run context').first().json.trigger === 'rebuild' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "ffff5465-23e5-5f4c-89a4-5b2ea49b9a59",
+      "name": "Answer: back to the page",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        5080,
+        -60
+      ],
+      "parameters": {
+        "respondWith": "redirect",
+        "redirectURL": "={{ 'http://' + $('POST /rebuild').first().json.headers.host + '/webhook/today' }}",
+        "options": {
+          "responseCode": 303
+        }
+      }
+    },
+    {
+      "id": "0cd3e380-70aa-53cb-8cc9-2f5aa8cbebcf",
+      "name": "Keep the last edition",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4480,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// The agent failed or chose nothing. Keep the last saved edition; never publish an empty page.\nconst agent = $('Editor agent').first().json;\nconst reason = agent.error\n  ? 'The editor agent failed: ' + String(agent.error.message || agent.error).slice(0, 200)\n  : 'The editor agent returned no picks.';\nreturn [{ json: { reason, html: '<p>' + reason + ' The last edition stays online. <a href=\"/webhook/today\">Back to the page</a></p>' } }];\n"
+      },
+      "notes": "Never publish an empty page: if the agent fails or picks nothing, yesterday's page stays."
+    },
+    {
+      "id": "29c80296-fa96-5202-892a-0d2e225e991f",
+      "name": "Started by Rebuild? (no edition)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4680,
+        200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $('Run context').first().json.trigger === 'rebuild' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "4614131f-3240-51ff-bb40-71c35e3ffb06",
+      "name": "Answer: why nothing changed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        4880,
+        200
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseCode": 502,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "content-type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Claude Haiku 5.5 (translate)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Translate to English",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Haiku 5.5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Editor agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_ai_news": {
+      "ai_tool": [
+        [
+          {
+            "node": "Editor agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_price_history": {
+      "ai_tool": [
+        [
+          {
+            "node": "Editor agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lookup_courses": {
+      "ai_tool": [
+        [
+          {
+            "node": "Editor agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Picks format": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Editor agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Haiku 5.5 (fix format)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Picks format",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every day 08:00": {
+      "main": [
+        [
+          {
+            "node": "Run context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST /rebuild": {
+      "main": [
+        [
+          {
+            "node": "Run context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run context": {
+      "main": [
+        [
+          {
+            "node": "My watchlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "My watchlist": {
+      "main": [
+        [
+          {
+            "node": "Load today's edition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load today's edition": {
+      "main": [
+        [
+          {
+            "node": "Rebuilt in the last 10 min?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rebuilt in the last 10 min?": {
+      "main": [
+        [
+          {
+            "node": "Answer: too soon",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Load private config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load private config": {
+      "main": [
+        [
+          {
+            "node": "Gmail · list last 24h",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IBKR · request statement",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Load travel cache",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Zeus link set?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail · list last 24h": {
+      "main": [
+        [
+          {
+            "node": "Mail ids",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mail ids": {
+      "main": [
+        [
+          {
+            "node": "Gmail · read headers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IBKR · request statement": {
+      "main": [
+        [
+          {
+            "node": "IBKR · wait for report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IBKR · wait for report": {
+      "main": [
+        [
+          {
+            "node": "IBKR · get statement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IBKR · get statement": {
+      "main": [
+        [
+          {
+            "node": "Still generating?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Still generating?": {
+      "main": [
+        [
+          {
+            "node": "IBKR · wait again",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Watchlist codes (IBKR counted)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IBKR · wait again": {
+      "main": [
+        [
+          {
+            "node": "IBKR · get statement (retry)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IBKR · get statement (retry)": {
+      "main": [
+        [
+          {
+            "node": "Watchlist codes (IBKR counted)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Watchlist codes (IBKR counted)": {
+      "main": [
+        [
+          {
+            "node": "Twelve Data · daily candles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load travel cache": {
+      "main": [
+        [
+          {
+            "node": "Load shopping cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load shopping cache": {
+      "main": [
+        [
+          {
+            "node": "SerpApi · this month",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpApi · this month": {
+      "main": [
+        [
+          {
+            "node": "SerpApi plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpApi plan": {
+      "main": [
+        [
+          {
+            "node": "Search flights?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search flights?": {
+      "main": [
+        [
+          {
+            "node": "Routes to search",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search shopping?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Routes to search": {
+      "main": [
+        [
+          {
+            "node": "SerpApi · flights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpApi · flights": {
+      "main": [
+        [
+          {
+            "node": "Search shopping?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search shopping?": {
+      "main": [
+        [
+          {
+            "node": "Products to search",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hotels due this week",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Products to search": {
+      "main": [
+        [
+          {
+            "node": "SerpApi · shopping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpApi · shopping": {
+      "main": [
+        [
+          {
+            "node": "Hotels due this week",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hotels due this week": {
+      "main": [
+        [
+          {
+            "node": "SerpApi · hotels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zeus link set?": {
+      "main": [
+        [
+          {
+            "node": "Zeus · timetable (ICS)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AIHOT · hot topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zeus · timetable (ICS)": {
+      "main": [
+        [
+          {
+            "node": "Read Zeus events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Zeus events": {
+      "main": [
+        [
+          {
+            "node": "AIHOT · hot topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AIHOT · hot topics": {
+      "main": [
+        [
+          {
+            "node": "AIHOT · last 24h",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AIHOT · last 24h": {
+      "main": [
+        [
+          {
+            "node": "AIHOT · Codex resets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AIHOT · Codex resets": {
+      "main": [
+        [
+          {
+            "node": "Dealabs · Apple",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dealabs · Apple": {
+      "main": [
+        [
+          {
+            "node": "Dealabs · sportswear",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dealabs · sportswear": {
+      "main": [
+        [
+          {
+            "node": "Dealabs · fashion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dealabs · fashion": {
+      "main": [
+        [
+          {
+            "node": "Dealabs · hiking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dealabs · hiking": {
+      "main": [
+        [
+          {
+            "node": "Load source cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load source cache": {
+      "main": [
+        [
+          {
+            "node": "Load yesterday's edition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load yesterday's edition": {
+      "main": [
+        [
+          {
+            "node": "Load price log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load price log": {
+      "main": [
+        [
+          {
+            "node": "Check sources and use cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check sources and use cache": {
+      "main": [
+        [
+          {
+            "node": "Timetable rows",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Cache rows",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pick candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Timetable rows": {
+      "main": [
+        [
+          {
+            "node": "Save timetable (upsert by day)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick candidates": {
+      "main": [
+        [
+          {
+            "node": "Text to translate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text to translate": {
+      "main": [
+        [
+          {
+            "node": "Anything to translate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything to translate?": {
+      "main": [
+        [
+          {
+            "node": "Translate to English",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare agent input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translate to English": {
+      "main": [
+        [
+          {
+            "node": "English text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "English text": {
+      "main": [
+        [
+          {
+            "node": "Prepare agent input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cache rows": {
+      "main": [
+        [
+          {
+            "node": "Save source cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare agent input": {
+      "main": [
+        [
+          {
+            "node": "Price rows",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Editor agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Price rows": {
+      "main": [
+        [
+          {
+            "node": "Save today's prices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Editor agent": {
+      "main": [
+        [
+          {
+            "node": "Has picks?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Keep the last edition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has picks?": {
+      "main": [
+        [
+          {
+            "node": "Assemble EDITION",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Keep the last edition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble EDITION": {
+      "main": [
+        [
+          {
+            "node": "Save edition (upsert by date)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save edition (upsert by date)": {
+      "main": [
+        [
+          {
+            "node": "Started by Rebuild?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Started by Rebuild?": {
+      "main": [
+        [
+          {
+            "node": "Answer: back to the page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep the last edition": {
+      "main": [
+        [
+          {
+            "node": "Started by Rebuild? (no edition)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Started by Rebuild? (no edition)": {
+      "main": [
+        [
+          {
+            "node": "Answer: why nothing changed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
