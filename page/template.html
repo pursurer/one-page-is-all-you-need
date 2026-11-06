@@ -5911,9 +5911,10 @@ const Cat = (() => {
   const fiveMid = () => { const f = document.getElementById("five")?.getBoundingClientRect(), mid = window.innerHeight / 2; return !!f && f.top < mid && f.bottom > mid; };
   /* Lower blocks rise into place; wait until they have, so the cat lands where the number ends up. */
   const settled = tg => { const r = tg.el.closest(".reveal"); return !r || (r.classList.contains("in") && getComputedStyle(r).transform === "none"); };
-  function placeThreads(id, el) {
+  /* fresh: a roll has just laid it, so it lives its full time from now; otherwise (a re-render) it keeps its time. */
+  function placeThreads(id, el, fresh = false) {
     (threads.get(id) || []).forEach(n => n.remove());
-    if (!laid.has(id)) laid.set(id, performance.now());
+    if (fresh || !laid.has(id)) laid.set(id, performance.now());
     const seed = [...id].reduce((a, ch) => a + ch.charCodeAt(0), 0) * 0.37;
     const out = lines(el).map((L, k) => {
       const n = document.createElement("canvas"), w = Math.ceil(L.width);
@@ -6150,7 +6151,7 @@ const Cat = (() => {
     if (!ls.length) return;
     const sp = !reduce ? split(key) : null;
     const paw = await swipe({ x: ls[0].left, y: ls[0].bottom });
-    const ns = placeThreads(tg.id, key);
+    const ns = placeThreads(tg.id, key, true);
     if (reduce) return;
     lrect();
     const chars = sp ? sp.chars.map(c => ({ c, r: rel(c.getBoundingClientRect()) })) : [];
@@ -6254,7 +6255,7 @@ const Cat = (() => {
       await travel(to);
       landedAt = performance.now();
       if (asked) { if (!threads.has(tg.id)) await underline(tg); }
-      else if (tg.type === "yarn") { if (!laid.has(tg.id)) await underline(tg); }
+      else if (tg.type === "yarn") { if (!threads.has(tg.id)) await underline(tg); }
       else if (!reduce && performance.now() - (played.get(tg.id) ?? -1e9) > 20000) { played.set(tg.id, performance.now()); await play(tg); }
     } catch (e) {
       /* The page re-rendered under the cat; refresh() has new targets and the next frame settles it. */
@@ -6275,6 +6276,7 @@ const Cat = (() => {
       const only = fiveMid(), other = targets.filter(x => x !== tg && x.type === "play" && seen(x) && (!only || x.five) && now - (played.get(x.id) ?? -1e9) > 20000);
       if (other.length && r < 0.35) await go(other[Math.floor(Math.random() * other.length)]);
       else if (tg && tg.type === "play" && r < 0.5 && now - (played.get(tg.id) ?? 0) > 8000) { played.set(tg.id, now); await play(tg); }
+      else if (tg && tg.type === "yarn" && r < 0.5 && !threads.has(tg.id)) await underline(tg);
       else if (r < 0.55) await stroll();
       else if (r < 0.62) { for (let i = 0; i < 2; i++) { st.ears = 0.45; await wait(130); st.ears = 0; await wait(170); } }
       else if (r < 0.69) { st.tilt = -0.14 * st.dir; st.look = { x: pos.x - 160 * st.dir, y: pos.y - 120 }; await wait(800); st.look = { x: pos.x + 160 * st.dir, y: pos.y - 40 }; await wait(700); }
