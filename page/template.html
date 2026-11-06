@@ -3296,6 +3296,7 @@ const FX = [
   ["pickOrder", "Blocks the five points to come first", true],
   ["aiLead", "AI news leads with its top story", true],
   ["candleFocus", "Candles in the code's colour, today lit", true],
+  ["catFloor", "The cat keeps one size and sits on real edges", true],
   ["cardGlow", "Glow around the five (v7)", false],
   ["bandFade", "Soft ends on the pond band (v7)", false]
 ];
@@ -5185,6 +5186,8 @@ const Cat = (() => {
   /* Canvas size and the feet's place in it. */
   const W = 120, H = 96, AX = 60, AY = 94;
   const SCALES = [0.7, 0.58, 0.48];
+  /* Trial v12 (catFloor): the sizes the cat may take to sit on the page. One: it no longer shrinks to fit a spot. */
+  const SEAT = DESIGN.catFloor ? SCALES.slice(0, 1) : SCALES;
   /* Trial v8: its size by the pond at the end of the page; the canvas is drawn finer by as much, so it stays sharp. */
   const FOOT_S = 1.3, ZOOM = DESIGN.footCat ? FOOT_S : 1;
   const footZone = () => { const r = document.getElementById("slot-foot")?.getBoundingClientRect(); return r && r.height && r.bottom > 0 && r.top < window.innerHeight ? r : null; };
@@ -5193,6 +5196,11 @@ const Cat = (() => {
   let pos = null, current = null, busy = false, hidden = true, targets = [], LR = null, threadAt = 0;
   let pointer = null, pointerAt = -1e9, lastY = window.scrollY, wish = null, stay = null, overRow = null, bank = null;
   const threads = new Map(), played = new Map(), laid = new Map();
+  /* Trial v12 (catFloor): a new number draws the cat only once the page has stopped for a moment and the cat has sat
+     for a little while; a reader scrolling past rows of numbers no longer sets it hopping from one to the next. */
+  let scrolledAt = 0, landedAt = 0;
+  addEventListener("scroll", () => { scrolledAt = performance.now(); }, { passive: true });
+  const ready = now => !DESIGN.catFloor || hidden || !pos || (now - scrolledAt > 260 && now - landedAt > 900);
 
   /* ── the cat as shapes, in its own units: feet at 0,0, up is negative ── */
   const RANK = { tail: 0, body: 1, leg: 2, paw: 3, head: 4, front: 5 };
@@ -5577,7 +5585,7 @@ const Cat = (() => {
    */
   const SOLID = ".spark, .bar, .chev, .cite, .tool, .ref, .chip, .all-codes, .tier, .pond-slot, .mast-mark, .btn, select, .status, .cursor, .chart rect, .chart .wick";
   const box = (x, y, s, dir) => dir < 0 ? { left: x - 30 * s, right: x + 35 * s, top: y - 74 * s, bottom: y } : { left: x - 35 * s, right: x + 30 * s, top: y - 74 * s, bottom: y };
-  function scan(win) {
+  function scan(win, own) {
     const near = q => q.right > win.left - 40 && q.left < win.right + 40 && q.bottom > win.top - 90 && q.top < win.bottom + 10;
     const obs = [], raw = [], range = document.createRange(), tw = document.createTreeWalker(page, NodeFilter.SHOW_TEXT);
     for (let n; (n = tw.nextNode());) {
@@ -5585,17 +5593,26 @@ const Cat = (() => {
       const el = n.parentElement;
       if (!el || el.closest(".marks, .sr, .card") || !near(rel(el.getBoundingClientRect()))) continue;
       range.selectNodeContents(n);
+      /* Trial v12 (catFloor): the cat may stand on the top of the number it plays with, not on other words. */
+      const mine = !DESIGN.catFloor || (own && own.contains(el));
       for (const r of range.getClientRects()) {
         if (r.width < 1) continue;
         const q = rel(r);
         obs.push(q);
-        raw.push({ y: Math.floor(q.top) - 3, x0: q.left, x1: q.right, kind: "top" });
-        raw.push({ y: Math.round(q.bottom - q.height * 0.2), x0: q.left - 150, x1: q.right + 150, kind: "base" });
+        if (mine) raw.push({ y: Math.floor(q.top) - 3, x0: q.left, x1: q.right, kind: "top" });
+        if (!DESIGN.catFloor) raw.push({ y: Math.round(q.bottom - q.height * 0.2), x0: q.left - 150, x1: q.right + 150, kind: "base" });
       }
     }
     page.querySelectorAll(SOLID).forEach(el => { if (el.closest(".card")) return; const q = rel(el.getBoundingClientRect()); if (q.width >= 1 && near(q)) obs.push(q); });
-    const rule = (sel, low) => page.querySelectorAll(sel).forEach(el => { const q = rel(el.getBoundingClientRect()); if (q.width && near(q)) raw.push({ y: Math.round(low ? q.bottom : q.top), x0: q.left, x1: q.right, kind: "rule" }); });
-    rule(".picks > li + li, .rows > li + li, .agenda li + li, .blk, .quiet-strip, .glance li + li, .five, .behind, .footer", false);
+    /* Trial v12 (catFloor): only an edge that is drawn: a border on that side, the glass rim of a card, or a pass's outline. */
+    const drawn = (el, low) => {
+      if (!DESIGN.catFloor || el.matches(".ticket")) return true;
+      const c = getComputedStyle(el), side = low ? "Bottom" : "Top";
+      if (parseFloat(c[`border${side}Width`]) >= 1 && c[`border${side}Style`] !== "none" && !/transparent|\/ 0\)$|, 0\)$/.test(c[`border${side}Color`])) return true;
+      return el.matches(".blk, .five, .quiet-strip") && getComputedStyle(el, "::before").content !== "none";
+    };
+    const rule = (sel, low) => page.querySelectorAll(sel).forEach(el => { const q = rel(el.getBoundingClientRect()); if (q.width && near(q) && drawn(el, low)) raw.push({ y: Math.round(low ? q.bottom : q.top), x0: q.left, x1: q.right, kind: "rule" }); });
+    rule(".picks > li + li, .rows > li + li, .agenda li + li, .blk, .quiet-strip, .glance li + li, .five, .behind, .footer" + (DESIGN.catFloor ? ", .ticket" : ""), false);
     rule(".holds > li, .colhead, .five", true);
     page.querySelectorAll(".chart rect").forEach(el => { const q = rel(el.getBoundingClientRect()); if (near(q)) raw.push({ y: Math.floor(q.top) - 3, x0: q.left, x1: q.right, kind: "top" }); });
     raw.sort((a, b) => a.y - b.y || a.x0 - b.x0);
@@ -5604,15 +5621,15 @@ const Cat = (() => {
     /* A little air around everything, so the cat never touches a word. */
     return { obs: obs.map(o => ({ left: o.left - 6, right: o.right + 6, top: o.top - 2, bottom: o.bottom + 2 })), floors };
   }
-  function spots(T, win) {
+  function spots(T, win, own) {
     lrect();
     const vt = -LR.top + 8, vb = -LR.top + window.innerHeight - 8, lw = LR.width;
     win.top = Math.max(win.top, vt); win.bottom = Math.min(win.bottom, vb);
-    const { obs, floors } = scan(win), cx = (T.left + T.right) / 2, list = [];
+    const { obs, floors } = scan(win, own), cx = (T.left + T.right) / 2, list = [];
     for (const f of floors) {
       if (f.y > vb || f.y < vt + 40) continue;
       const x0 = Math.max(f.x0, win.left), x1 = Math.min(f.x1, win.right);
-      for (const s of SCALES) {
+      for (const s of SEAT) {
         const band = obs.filter(o => o.bottom > f.y - 76 * s && o.top < f.y);
         for (let x = x0; x <= x1; x += 6) {
           const dir = cx >= x ? 1 : -1, R = box(x, f.y, s, dir);
@@ -5628,8 +5645,9 @@ const Cat = (() => {
   function find(tg) {
     const T = aim(tg);
     if (!T) return null;
-    for (const [dx, up, down] of [[300, 200, 140], [640, 400, 320]]) {
-      const { list } = spots(T, { left: T.left - dx, right: T.right + dx, top: T.top - up, bottom: T.bottom + down });
+    /* Trial v12 (catFloor): then anywhere on the screen, the nearest first, rather than out of sight. */
+    for (const [dx, up, down] of [[300, 200, 140], [640, 400, 320], ...(DESIGN.catFloor ? [[1e4, 1e4, 1e4]] : [])]) {
+      const { list } = spots(T, { left: T.left - dx, right: T.right + dx, top: T.top - up, bottom: T.bottom + down }, tg.el);
       if (list.length) return list[0];
     }
     return null;
@@ -6007,11 +6025,14 @@ const Cat = (() => {
     try {
       const to = find(tg);
       if (!to) {
+        /* Trial v12 (catFloor): a cat already sitting in sight on a free place stays there. */
+        if (DESIGN.catFloor && pos && !hidden && free()) return;
         /* Nowhere free near it: the cat stays out of sight rather than cover the text. */
         hidden = true;
         return;
       }
       await travel(to);
+      landedAt = performance.now();
       if (asked) { if (!threads.has(tg.id)) await underline(tg); }
       else if (tg.type === "yarn") { if (!laid.has(tg.id)) await underline(tg); }
       else if (!reduce && performance.now() - (played.get(tg.id) ?? -1e9) > 20000) { played.set(tg.id, performance.now()); await play(tg); }
@@ -6092,7 +6113,7 @@ const Cat = (() => {
   async function stroll() {
     const T = aim(current);
     if (!T || !pos) return;
-    const { list, obs } = spots(T, { left: pos.x - 160, right: pos.x + 160, top: pos.y - 80, bottom: pos.y + 4 });
+    const { list, obs } = spots(T, { left: pos.x - 160, right: pos.x + 160, top: pos.y - 80, bottom: pos.y + 4 }, current.el);
     const clear = to => { for (let x = Math.min(pos.x, to.x); x <= Math.max(pos.x, to.x); x += 8) { const R = box(x, to.y, to.s, to.dir); if (obs.some(o => hit(o, R))) return false; } return true; };
     const opts = list.filter(c => c.y === pos.y && c.s === pos.s && Math.abs(c.x - pos.x) >= 36 && Math.abs(c.x - pos.x) <= 150 && c.score < list[0].score + 90 && clear(c));
     if (!opts.length) { tailSpeed = 6; await wait(900); return; }
@@ -6276,7 +6297,7 @@ const Cat = (() => {
     } else if (!busy) {
       const a = active();
       if (stay !== null && Math.abs(window.scrollY - stay) > 80) stay = null;
-      if (a && (!current || a.id !== current.id) && stay === null) { if (settled(a)) go(a); }
+      if (a && (!current || a.id !== current.id) && stay === null) { if (settled(a) && ready(now)) go(a); }
       else if (current && now > checkAt) {
         checkAt = now + 700;
         if (hidden || !free()) go(current);
