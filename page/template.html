@@ -959,6 +959,48 @@
   @media (max-width: 899px) { :root[data-fx~="rows"] .board, .brow { gap: 32px; } :root[data-fx~="rows"] .board { margin-top: 64px; } }
   @media (max-width: 720px) { :root[data-fx~="rows"] .board, .brow { gap: 12px; } :root[data-fx~="rows"] .board { margin-top: 32px; } }
   @media (prefers-reduced-motion: reduce) { .brow > .reveal + .reveal { transition-delay: 0ms; } }
+
+  /* ===== Trial v11 (aiLead): AI news leads with its top story (Ayush Soni, "type is the motif": the headline set large
+     is the picture; shawn., "X post cards": one post as an object, its counts in a row under it). The block's big
+     figure is the top story's heat, its subject the headline in the title serif, as Markets leads with its biggest move
+     and the trip with its best fare. The other stories follow as a ranked list: a number, the headline, the heat. ===== */
+  :root[data-fx~="aiLead"] .hero-l .ai-lead { display: block; max-width: 30ch; font-family: var(--serif); font-weight: 500; font-size: 34px; line-height: 40px; letter-spacing: -0.012em; color: var(--ink); text-wrap: balance; text-decoration-thickness: 1px; text-underline-offset: 7px; }
+  :root[data-fx~="aiLead"] .hero-l:has(> .ai-lead) { margin-top: 14px; }
+  :root[data-fx~="aiLead"] .hero-l:has(> .ai-lead) + .hero-x { margin-top: 10px; }
+  :root[data-fx~="aiLead"] .hero-x .tag { margin-right: 4px; }
+  :root[data-fx~="aiLead"] .rows > li.news:has(> .n) { grid-template-columns: 2.4em minmax(0, 1fr) 104px; column-gap: 16px; align-items: baseline; padding: 14px 0; }
+  :root[data-fx~="aiLead"] .rows > li.news > .n { font-size: 14px; line-height: 26px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  :root[data-fx~="aiLead"] .rows > li.news:has(> .n) > span:nth-child(2) { font-size: 18px; line-height: 26px; }
+  :root[data-fx~="aiLead"] li.news:has(> .n) .heat { display: grid; grid-template-columns: auto; justify-items: end; gap: 8px; }
+  :root[data-fx~="aiLead"] li.news:has(> .n) .heat > .meta { order: 0; font-size: 15px; line-height: 20px; font-weight: 600; color: var(--ink); text-align: right; white-space: nowrap; }
+  :root[data-fx~="aiLead"] li.news:has(> .n) .bar { order: 1; width: 96px; height: 4px; border-radius: 2px; }
+  :root[data-fx~="aiLead"] li.news:has(> .n) .bar i { height: 4px; border-radius: 2px; background: var(--ink-2); }
+  @media (max-width: 600px) {
+    :root[data-fx~="aiLead"] .hero-l .ai-lead { font-size: 26px; line-height: 32px; text-underline-offset: 5px; }
+    :root[data-fx~="aiLead"] .rows > li.news:has(> .n) { grid-template-columns: 2em minmax(0, 1fr); row-gap: 8px; }
+    :root[data-fx~="aiLead"] .rows > li.news:has(> .n) > span:nth-child(2) { font-size: 17px; line-height: 24px; }
+    :root[data-fx~="aiLead"] li.news:has(> .n) .heat { grid-column: 2; grid-template-columns: auto minmax(0, 96px); justify-items: start; align-items: center; gap: 12px; }
+    :root[data-fx~="aiLead"] li.news:has(> .n) .heat > .meta { font-size: 14px; }
+  }
+
+  /* ===== Trial v11 (candleFocus): the 30-day candles in the code's colour, today lit (see focusCandles in the script).
+     Up days are hollow with a tint, down days filled, as before; the bodies are rounded; the 1-month range is a band. ===== */
+  .chart.focus { overflow: visible; }
+  .chart.focus .wick { stroke: var(--c); stroke-width: 1.2; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  .chart.focus .up { fill: color-mix(in srgb, var(--c) 16%, var(--bg)); stroke: var(--c); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+  .chart.focus .down { fill: var(--c); stroke: var(--c); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+  .chart.focus .c-day { opacity: var(--age); transition: opacity 160ms var(--ease); }
+  .chart.focus .c-day.on { opacity: 1; }
+  .chart.focus .c-band { fill: color-mix(in srgb, var(--c) 9%, transparent); }
+  .chart.focus .lv { stroke: color-mix(in srgb, var(--c) 55%, var(--ink-2)); }
+  .chart.focus .c-col { fill: color-mix(in srgb, var(--ink) 7%, transparent); transition: transform 160ms var(--ease); }
+  .c-wrap { position: relative; }
+  .c-tip { position: absolute; transform: translate(-50%, calc(-100% - 10px)); padding: 2px 8px; border-radius: 6px; background: color-mix(in srgb, var(--bg) 82%, transparent); color: var(--ink-2); white-space: nowrap; pointer-events: none; }
+  .c-tip:empty { display: none; }
+  .c-tip b { color: var(--ink); font-weight: 600; }
+  .c-tip.end { transform: translate(calc(-100% + 12px), calc(-100% - 10px)); }
+  .c-tip.start { transform: translate(-12px, calc(-100% - 10px)); }
+  @media (prefers-reduced-motion: reduce) { .chart.focus .c-day, .chart.focus .c-col { transition: none; } }
 </style>
 </head>
 <body>
@@ -3252,6 +3294,8 @@ const FX = [
   ["lily", "... on a lily pad in it", true],
   ["rows", "Board in rows, on the top row's lines", true],
   ["pickOrder", "Blocks the five points to come first", true],
+  ["aiLead", "AI news leads with its top story", true],
+  ["candleFocus", "Candles in the code's colour, today lit", true],
   ["cardGlow", "Glow around the five (v7)", false],
   ["bandFade", "Soft ends on the pond band (v7)", false]
 ];
@@ -3306,6 +3350,8 @@ const state = {
   symbol: EDITION.market ? byMove(EDITION.market.holdings)[0]?.symbol ?? null : null,
   failure: "none",
   busy: false,
+  /* Live: today's page is being loaded again because this edition is out of date (see Renew). */
+  renewing: false,
   error: null,
   behind: false,
   more: {},
@@ -3409,6 +3455,7 @@ function chartSvg(h) {
   [0.25, 0.5, 0.75].forEach(f => { const yy = pad + f * (H - pad * 2); s += `<line class="gl" x1="0" x2="${W}" y1="${yy}" y2="${yy}"/>`; });
   const r = rangeOf(h);
   const levels = (y, x0) => r ? [r.hi, r.lo].map(v => `<line class="lv" x1="${x0}" x2="${W - pad}" y1="${y(v)}" y2="${y(v)}"/>`).join("") : "";
+  if (DESIGN.candleFocus && h.ohlc && h.ohlc.length) return focusCandles(h, r, demo);
   if (h.ohlc && h.ohlc.length) {
     const data = h.ohlc, y = scale(Math.min(...data.map(d => d.l)), Math.max(...data.map(d => d.h)));
     const step = (W - pad * 2) / data.length, bw = Math.max(3, step * 0.56);
@@ -3756,7 +3803,8 @@ function render() {
       <button class="status${staleOnes.length ? " bad" : ""}" type="button" data-jump="behind"><span class="dot" aria-hidden="true"></span>${esc(statusText)}</button>`;
 
   /* An older edition when today's is not built yet, one notice per stale source, and a failed rebuild request. */
-  document.getElementById("notice").innerHTML = (E.staleEdition ? `<p class="notice" role="status"><b>This is the edition of ${esc(E.weekday)} ${esc(E.day)} ${esc(E.monthYear)}.</b> Today's edition is not built yet; it appears after the next run.</p>` : "")
+  document.getElementById("notice").innerHTML = (state.renewing ? `<p class="notice" role="status"><b>Loading today's edition.</b> If the 08:00 run was missed, n8n builds it first, which takes up to a minute.</p>`
+    : E.staleEdition ? `<p class="notice" role="status"><b>This is the edition of ${esc(E.weekday)} ${esc(E.day)} ${esc(E.monthYear)}.</b> Today's edition is not built yet; it appears after the next run.</p>` : "")
     + staleOnes.map(s =>
       `<p class="notice" role="status"><b>⚠ ${esc(s.short)} failed twice${s.code ? ` (${esc(s.code)})` : ""}.</b> ${esc(s.note || "The last cached data is shown.")}${(b => b ? ` <button class="ink-link" type="button" data-goto="${b.sec}">Go to the block</button>` : "")(BLOCKS.find(b => b.src.includes(s.key)))}</p>`).join("")
     + (state.error ? `<p class="notice" role="status"><b>⚠ ${esc(state.error)}</b></p>` : "");
@@ -3848,29 +3896,36 @@ function render() {
      own heading, order and bar scale; without that, the items keep their order and share one scale. */
   const heatOf = a => Number(a.heat) || 0;
   const topHeat = list => Math.max(0, ...list.map(heatOf)) || 1;
-  const news = (a, i, max, unit) => `<li class="news${i === 0 ? " first" : ""}">
+  const news = (a, i, max, unit) => `<li class="news${i === 0 ? " first" : ""}">${lead ? `<span class="n meta" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>` : ""}
       <span><a class="ink-link" href="${safeUrl(a.url)}" target="_blank" rel="noopener"${zh(a.title)}>${esc(a.title)}</a>${a.isNew ? ` <span class="tag meta">new</span>` : ""} ${refLink(featuredAi(a))}</span>
       <span class="heat"><span class="meta"${unit === "score" ? ` title="AIHOT editors' score"` : unit ? ` title="AIHOT heat: people taking part"` : ""}${featuredAi(a) >= 0 ? toy("ai-" + a.url, "bar") : ""}>${esc(a.heat)} ${unit || "heat"}</span><span class="bar" aria-hidden="true"><i style="width:${Math.round(heatOf(a) / max * 100)}%"></i></span></span>
     </li>`;
   /* As many rows as the layout gives the card (three by default), then the rest folded away. */
-  const newsRows = (items, key, moreLabel, unit) => {
-    const max = topHeat(items), row = (a, i) => news(a, i, max, unit), n = fit.ai;
+  const newsRows = (all, key, moreLabel, unit, from = 0) => {
+    /* Trial v11 (aiLead): the list starts after the lead story (from 1), and its bars keep the lead's scale. */
+    const max = topHeat(all), items = all.slice(from), row = (a, i) => news(a, i + from, max, unit), n = fit.ai;
     return `<ul class="rows dim-list" style="margin-top:4px">${items.slice(0, n).map(row).join("")}</ul>
     ${items.length > n ? more(key, `${items.length - n} ${moreLabel}`, `<ul class="rows dim-list">${items.slice(n).map((a, i) => row(a, i + n)).join("")}</ul>`) : ""}`;
   };
   const watched = E.ai ? E.ai.watch : [], byList = watched.length > 0 && watched.every(a => a.list === "hot" || a.list === "24h");
   const hotNews = watched.filter(a => a.list === "hot").sort((a, b) => heatOf(b) - heatOf(a)), dayNews = watched.filter(a => a.list === "24h").sort((a, b) => heatOf(b) - heatOf(a));
+  /* Trial v11 (aiLead): the story that leads the block, the first of the hot list (or of the only list). */
+  const leadOf = (byList ? (hotNews.length ? hotNews : dayNews) : watched)[0];
+  const lead = DESIGN.aiLead && leadOf && leadOf.heat != null && Number.isFinite(Number(leadOf.heat)) ? leadOf : null, lead0 = lead ? 1 : 0;
   /* With two lists the figure counts the hot list, and the 24 hour list goes under it. */
   const aiN = !byList ? watched.length : hotNews.length || dayNews.length, stories = n => n === 1 ? "story" : "stories";
   const aiWhat = !byList || hotNews.length ? `${E.ai?.hotCount != null ? `of <span class="num">${esc(E.ai.hotCount)}</span> ` : ""}hot topics` : `${stories(dayNews.length)} from the last 24 hours`;
-  const aiHero = hero(aiN, `${aiWhat} ${aiN === 1 ? "matches" : "match"} your watchlist`, byList && hotNews.length && dayNews.length ? `and <span class="num">${dayNews.length}</span> ${stories(dayNews.length)} from the last 24 hours` : "");
-  avail.ai = !byList ? watched.length : hotNews.length || dayNews.length;
+  const aiHero = lead ? hero(esc(lead.heat), `<a class="ink-link ai-lead" href="${safeUrl(lead.url)}" target="_blank" rel="noopener"${zh(lead.title)}>${esc(lead.title)}</a>`,
+      `${lead.isNew ? `<span class="tag meta">new</span> ` : ""}${byList && !hotNews.length ? `the best scored of <span class="num">${aiN}</span> ${stories(aiN)} from the last 24 hours on your watchlist` : `the hottest of <span class="num">${aiN}</span> watchlist ${aiN === 1 ? "match" : "matches"}${E.ai?.hotCount != null ? ` among <span class="num">${esc(E.ai.hotCount)}</span> hot topics` : ""}`}${byList && hotNews.length && dayNews.length ? `; and <span class="num">${dayNews.length}</span> ${stories(dayNews.length)} from the last 24 hours` : ""}${featuredAi(lead) >= 0 ? ` ${refLink(featuredAi(lead))}` : ""}`,
+      featuredAi(lead) >= 0 ? toy("ai-" + lead.url, "bar") : "", byList && !hotNews.length ? "score" : "heat")
+    : hero(aiN, `${aiWhat} ${aiN === 1 ? "matches" : "match"} your watchlist`, byList && hotNews.length && dayNews.length ? `and <span class="num">${dayNews.length}</span> ${stories(dayNews.length)} from the last 24 hours` : "");
+  avail.ai = (!byList ? watched.length : hotNews.length || dayNews.length) - lead0;
   fill("ai", !E.ai ? offLine("aihot") : `${aiHero}
-    ${!watched.length ? "" : !byList ? newsRows(watched, "ai", "more topics")
+    ${!watched.length ? "" : !byList ? newsRows(watched, "ai", "more topics", undefined, lead0)
       : [[hotNews, "ai", "hot topics", "more hot topics", "heat"], [dayNews, "ai-24h", "last 24 hours", "more from the last 24 hours", "score"]].filter(g => g[0].length)
         /* Only the first list shows its three rows; a second list waits folded, so the block keeps three rows (trial v2). */
         .map(([items, key, label, moreLabel, unit], n) => n ? more(key, `${items.length} from the ${label}`, `<ul class="rows dim-list">${items.map((a, i) => news(a, i, topHeat(items), unit)).join("")}</ul>`)
-          : `<h3 class="group meta">${label} · ${items.length}</h3>${newsRows(items, key, moreLabel, unit)}`).join("")}
+          : `<h3 class="group meta">${label} · ${items.length}</h3>${newsRows(items, key, moreLabel, unit, lead0)}`).join("")}
     ${E.ai.codex ? `<p class="sub foot-note"><span class="meta">codex quota ·</span> <span${zh(E.ai.codex)}>${esc(E.ai.codex)}</span></p>` : ""}`);
 
   /* Portfolio, or the watchlist codes while IBKR is not connected. The change is at the last close, which on a weekend is Friday's.
@@ -7132,6 +7187,83 @@ const Island = (() => {
   });
 })();
 
+
+/*
+ * Trial v11 (candleFocus): the 30-day candles, after Damir Sokolovsky's "Unslopping a vibecoded dashboard" (one bar
+ * lit among quiet ones) and Lorenzo Cabra's "Stacked Bars" (rounded bars in colour). The candles take the code's own
+ * line colour, the one its row's trend line has; their bodies are rounded. Today's candle stands in a lit column with
+ * its change above it, and the days before it grow fainter with age. The 1-month range is a shaded band with its two
+ * dashed edges. A pointer over the chart moves the light to that day (see the hover below).
+ * The column and the band are paths, not rects: `.chart rect` is what the cat's yarn treats as a candle.
+ */
+function focusCandles(h, r, demo) {
+  const W = 560, H = 150, pad = 4, data = h.ohlc, last = data.length - 1;
+  const lo = Math.min(...data.map(d => d.l)), hi = Math.max(...data.map(d => d.h));
+  const y = v => pad + (hi - v) / ((hi - lo) || 1) * (H - pad * 2);
+  const step = (W - pad * 2) / data.length, bw = Math.max(3, step * 0.56), rx = Math.min(bw / 2, 2.5);
+  const cx = i => pad + step * i + step / 2, f = v => v.toFixed(1);
+  const box = (x0, y0, x1, y1) => `M${f(x0)} ${f(y0)}H${f(x1)}V${f(y1)}H${f(x0)}Z`;
+  const colour = DESIGN.colorLines ? `var(--line-${Math.max(0, EDITION.market.holdings.indexOf(h)) % 6})` : "var(--ink)";
+  const mood = moodAttr(h.pct < 0 ? "bad" : "good");
+  let s = "";
+  [0.25, 0.5, 0.75].forEach(k => { const yy = pad + k * (H - pad * 2); s += `<line class="gl" x1="0" x2="${W}" y1="${yy}" y2="${yy}"/>`; });
+  if (r) {
+    const x0 = pad + step * Math.max(0, data.length - (h.closes.length - r.from));
+    s += `<path class="c-band" d="${box(x0, y(r.hi), W - pad, y(r.lo))}"/>` + [r.hi, r.lo].map(v => `<line class="lv" x1="${f(x0)}" x2="${W - pad}" y1="${f(y(v))}" y2="${f(y(v))}"/>`).join("");
+  }
+  s += `<path class="c-col" d="${box(cx(last) - step / 2, 0, cx(last) + step / 2, H)}"/>`;
+  data.forEach((d, i) => {
+    const top = y(Math.max(d.o, d.c)), bot = y(Math.min(d.o, d.c));
+    /* the change on that day, against the close before it; today's is the edition's own figure */
+    const move = i === last && h.pct != null ? h.pct : (d.c / (i ? data[i - 1].c : d.o) - 1) * 100;
+    const age = i === last ? 1 : (0.9 - 0.55 * (last - i) / last).toFixed(2);
+    const today = i === last ? ` data-perch="market-today-${esc(h.symbol)}" data-act="squash"${mood}` : "";
+    s += `<g class="c-day${i === last ? " on" : ""}" style="--age:${age}" data-i="${i}" data-m="${move.toFixed(2)}" data-x="${f(cx(i) / W * 100)}" data-y="${f(y(d.h) / H * 100)}">`
+      + `<line class="wick" x1="${f(cx(i))}" x2="${f(cx(i))}" y1="${f(y(d.h))}" y2="${f(y(d.l))}"/>`
+      + `<rect class="${d.c >= d.o ? "up" : "down"}" x="${f(cx(i) - bw / 2)}" y="${f(top)}" width="${f(bw)}" height="${f(Math.max(1, bot - top))}" rx="${rx}"${today}/></g>`;
+  });
+  const svg = `<svg class="chart focus" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(h.symbol)}, last ${data.length} daily candles${demo}." style="--c:${colour}">${s}</svg>`;
+  return {
+    svg: `<div class="c-wrap" data-last="${last}" data-step="${f(step)}">${svg}<span class="c-tip meta" aria-hidden="true"></span></div>`,
+    note: "daily candles" + demo + " · hollow closed up, filled closed down · today lit, earlier days fainter"
+  };
+}
+
+/*
+ * Trial v11 (candleFocus): the light follows the pointer. Over the chart, the day under the pointer is lit and says its
+ * change and how many trading days back it is; off the chart, the light goes back to today. Each render draws the
+ * chart again, so the tip is placed after every render too.
+ */
+(() => {
+  if (!DESIGN.candleFocus) return;
+  const back = n => n === 0 ? "today" : `${n} trading ${n === 1 ? "day" : "days"} back`;
+  function light(wrap, i) {
+    const last = +wrap.dataset.last, g = wrap.querySelector(`.c-day[data-i="${i}"]`), tip = wrap.querySelector(".c-tip");
+    if (!g || !tip) return;
+    wrap.querySelectorAll(".c-day.on").forEach(x => x.classList.remove("on"));
+    g.classList.add("on");
+    wrap.querySelector(".c-col")?.setAttribute("transform", `translate(${((i - last) * +wrap.dataset.step).toFixed(1)} 0)`);
+    tip.innerHTML = `<b>${chg(+g.dataset.m)}</b> ${back(last - i)}`;
+    const x = +g.dataset.x;
+    tip.style.left = `${x}%`;
+    tip.style.top = `${g.dataset.y}%`;
+    tip.classList.toggle("end", x > 82);
+    tip.classList.toggle("start", x < 18);
+  }
+  afterRender.push(() => document.querySelectorAll(".c-wrap").forEach(w => light(w, +w.dataset.last)));
+  let over = null;
+  document.addEventListener("pointermove", e => {
+    const wrap = e.target.closest?.(".c-wrap");
+    if (over && over !== wrap) { light(over, +over.dataset.last); over = null; }
+    if (!wrap) return;
+    const svg = wrap.querySelector("svg"), b = svg.getBoundingClientRect(), k = b.width / 560;
+    const i = Math.max(0, Math.min(+wrap.dataset.last, Math.floor((e.clientX - b.left - 4 * k) / (+wrap.dataset.step * k))));
+    over = wrap;
+    light(wrap, i);
+  }, { passive: true });
+  document.addEventListener("pointerleave", () => { if (over) { light(over, +over.dataset.last); over = null; } });
+})();
+
 balance();
 applyTheme();
 /* Trial v4: the rows are fitted again when the width changes or the fonts arrive. */
@@ -7146,6 +7278,50 @@ document.fonts?.ready.then(balance);
 Pond.start();
 Marks.start();
 Cat.start();
+
+/* Live: a tab that stays open, or that Chrome puts back from its cache, keeps the edition it was opened with.
+   From 08:05 Paris n8n has today's edition (the 08:00 run, or the page builds it when that run was missed),
+   so once this edition is older than that, today's page is opened again. The page is sandboxed (origin null):
+   it cannot ask n8n first and has no storage. The time of the last try is kept in window.name, which a reload
+   keeps, and there is at most one try every 30 minutes. When n8n is not running, the browser shows its error page. */
+const Renew = (() => {
+  const KEY = "one-page-renew:", WAIT = 30 * 60e3, DUE = 8 * 60 + 5;
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  /* The date of the newest edition n8n should have at this time: today from 08:05 Paris, the day before until then. */
+  const due = (ms = Date.now()) => {
+    const p = Object.fromEntries(parts.formatToParts(ms).map(x => [x.type, x.value]));
+    const back = Number(p.hour) * 60 + Number(p.minute) < DUE ? 1 : 0;
+    return new Date(Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day) - back)).toISOString().slice(0, 10);
+  };
+  const lastTry = () => { const m = /^one-page-renew:(\d+)$/.exec(window.name); return m ? Number(m[1]) : 0; };
+  const mark = () => { window.name = KEY + Date.now(); };
+  const old = () => EDITION.date < due();
+  function check() {
+    if (!live || state.renewing || state.busy || document.visibilityState !== "visible" || !old()) return;
+    /* A try in the future means the clock was set back: do not let it block. */
+    const since = Date.now() - lastTry();
+    if (since >= 0 && since < WAIT) return;
+    mark();
+    state.renewing = true;
+    render();
+    location.replace("/webhook/today");
+    /* Still here after two minutes: the load was stopped. Take the notice away; the next try waits for WAIT. */
+    setTimeout(() => { state.renewing = false; render(); }, 120e3);
+  }
+  function start() {
+    if (!live) return;
+    /* Straight from n8n (not from the cache) and still not today's: n8n has just tried to build it, so wait before asking again. */
+    const nav = performance.getEntriesByType?.("navigation")?.[0];
+    if (nav && nav.transferSize > 0 && EDITION.staleEdition && old()) mark();
+    document.addEventListener("visibilitychange", check);
+    window.addEventListener("focus", check);
+    window.addEventListener("pageshow", e => { if (e.persisted && state.renewing) { state.renewing = false; render(); } check(); });
+    setInterval(check, 60e3);
+    check();
+  }
+  return { due, check, start };
+})();
+Renew.start();
 </script>
 </body>
 </html>
