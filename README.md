@@ -17,21 +17,20 @@
 This is my final project for the EPITA course *Automation with n8n* (2026). It is also where the [ASCII Koi](https://github.com/pursurer/ascii-koi) pond and the black cat began.
 
 <p align="center">
-  <img src="media/board.png" alt="The page after scrolling: the koi pond shrinks into a band under the masthead. Below it, Today's five: one to-do (confirm an exam slot by Friday 30 October), three things to know and one shopping pick, each tagged with the sources and tools the agent used. Beside it, today, in order: every section ranked by what matters today, with Mail and Classes first because they need you." width="100%">
+  <img src="media/board.png" alt="The page after scrolling: the koi pond shrinks into a band under the masthead. Below it, Today's five: one to-do (confirm an exam slot by Friday 30 October) and four things to know, each tagged with the sources and tools the agent used. Beside it, the inbox: 2 need you today, with a week of mail drawn as tiles." width="100%">
 </p>
 
 ## What is on the page
 
 | Section | Source | What happens |
 |---|---|---|
-| **Today's five** | All of the below | The editor agent (Claude Haiku 5.5 in an n8n AI Agent node) picks the five items that matter today, groups them into *to do*, *to know* and *shopping*, and names the sources and tools behind each one |
-| **today, in order** | All of the below | Every section in one list, ranked by what matters today: *needs you* first, then *moved*, then *to read*, each with one line of status |
-| **Mail** | Gmail, read-only | Sender and subject only, never the body. Promotions and social mail are only counted. One-time codes never reach the agent |
+| **Today's five** | All of the below | The editor agent (Claude Haiku 5.5 in an n8n AI Agent node) picks the five items that matter today, splits them into *to do* and *to know*, and names the sources and tools behind each one |
+| **Inbox** | Gmail, read-only | Sender and subject only, never the body. Promotions and social mail are only counted. One-time codes never reach the agent |
 | **Classes** | Zeus timetable (ICS link) | The next 14 days, one row per day. The agent checks clashes with `lookup_courses` |
-| **AI and tech** | [AIHOT](https://aihot.news) | Keyword match, and news already seen yesterday is left out. The agent can search more with `search_ai_news` |
-| **Watchlist** | Twelve Data; IBKR Flex | Daily candles for 8 watchlist codes, each placed against its 1-month high and low. IBKR positions are only counted: no code, quantity or amount goes further |
-| **Deals** | SerpApi Google Shopping; Dealabs | The cheapest new offer for each watchlist item, compared with its own 7-day low (`get_price_history`) |
-| **Christmas trip** | SerpApi Google Flights and Hotels | Christmas fares from Paris for a few routes, with a price line per route |
+| **AI news** | [AIHOT](https://aihot.news) | Keyword match, and news already seen yesterday is left out. The agent can search more with `search_ai_news` |
+| **Market** | Twelve Data; IBKR Flex | Daily candles for 8 watchlist codes, each placed against its 1-month high and low. IBKR positions are only counted: no code, quantity or amount goes further |
+| **Shop** | SerpApi Google Shopping; Dealabs | The cheapest new offer for each watchlist item, compared with its own 7-day low (`get_price_history`) |
+| **Trip** | SerpApi Google Flights and Hotels | Christmas fares from Paris for a few routes, with a price line per route |
 | **Behind this page** | The run itself | Every source's status, the agent's tool calls, and a Rebuild button |
 
 Chinese and French texts (news titles, mail subjects, deal titles) are translated to English by one model call, which is checked line by line; a bad translation keeps the original.
@@ -43,7 +42,7 @@ Two workflows, joined by one JSON object, `EDITION`:
 1. **Daily Page · 1 Build edition** runs at 08:00, or when the page's Rebuild button posts to `/webhook/rebuild`. It fetches every source, falls back to the cache for a source that failed twice (and marks it stale), translates, lets the editor agent pick, checks the answer against a schema, and saves the day's `EDITION` in an n8n Data Table. If the agent fails, yesterday's page stays: it never publishes an empty one.
 2. **Daily Page · 2 Serve page** answers `GET /webhook/today`. It reads the latest `EDITION`, injects it into `page/template.html` between the `/*EDITION:BEGIN*/` and `/*EDITION:END*/` markers and returns the page. After 08:05 with no edition for today (the laptop was asleep at 08:00), it builds one first, at most once per 10 minutes.
 
-The page is one HTML file with no build step. It can show any `EDITION`: missing sections, several stale sources, fewer than five picks, an empty inbox. Opened directly, it shows the demo edition stored inside it. A tab left open moves to the new edition by itself once it is out of date (from 08:05 Paris time), at most one try every 30 minutes.
+The page is one HTML file with no build step. It can show any `EDITION`: missing sections, several stale sources, fewer than five picks, an empty inbox. Opened directly, it shows the demo edition stored inside it.
 
 **The design.** The page opens on a full-screen ASCII koi pond with the title drawn in character cells. As you scroll, the pond shrinks into a band under the masthead. A black cat in character tiles trots to the number or keyword the agent marked and plays with it: good news hops, bad news sinks, a countdown flips. A yarn thread underlines the to-dos for a few seconds, then fades so it never gets in the way of reading.
 
