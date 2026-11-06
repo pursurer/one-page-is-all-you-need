@@ -151,24 +151,6 @@
     },
     {
       "kind": "know",
-      "title": "OpenAI released GPT-6.1 Terra and halved its API price",
-      "key": "GPT-6.1 Terra",
-      "from": [
-        "AI news"
-      ],
-      "ref": {
-        "block": "ai",
-        "key": "https://aihot.news/story/30e9a1ca-aae1-410a-b1c6-53893df398db"
-      },
-      "tool": "search_ai_news",
-      "input": "AIHOT: hot topic no. 2, heat 403, new today.",
-      "why": "A price cut changes what the Claude API costs beside it. Before I rank it, I check if Anthropic answered.",
-      "call": "search_ai_news({ \"q\": \"Anthropic price\", \"window\": \"24h\" })",
-      "result": "0 items.",
-      "decision": "Show it as the second AI story, and say that Anthropic has not answered yet."
-    },
-    {
-      "kind": "know",
       "title": "TSLA fell 4.1 %, and no news explains it yet",
       "key": "4.1 %",
       "from": [
@@ -203,6 +185,24 @@
       "call": "get_price_history({ \"route\": \"CDG-HND\", \"days\": 7 })",
       "result": "7-day low before today: 892 €.",
       "decision": "Flag it: 9 % under the 7-day low."
+    },
+    {
+      "kind": "know",
+      "title": "MacBook Pro 14 PROLED at 3,299 €, the Apple list price, with no 7-day low yet",
+      "key": "3,299 €",
+      "from": [
+        "Deals"
+      ],
+      "ref": {
+        "block": "deals",
+        "key": "Apple Pro 14\" Écran PROLED XDR 1 To SSD 24 Go RAM Puce M5 Pro CPU 15 cœurs GPU 16 cœurs Noir sidéral MacBook"
+      },
+      "tool": "get_price_history",
+      "input": "Google Shopping: “Apple Pro 14\" Écran PROLED XDR … Puce M5 Pro … MacBook”, Apple, 3 299 €.",
+      "why": "It is on the watchlist, but a price is only news against the days before it.",
+      "call": "get_price_history({ \"item\": \"MacBook Pro 14 PROLED\", \"days\": 7 })",
+      "result": "No price logged before today.",
+      "decision": "Not a deal yet: it is the Apple list price, and there is no earlier price to compare with."
     }
   ],
   "courses": {
@@ -248,51 +248,7 @@
       }
     ],
     "hidden": 14,
-    "codesHidden": 1,
-    "week": [
-      {
-        "date": "2026-10-21",
-        "act": 1,
-        "later": 4,
-        "hidden": 11,
-        "codes": 0
-      },
-      {
-        "date": "2026-10-22",
-        "act": 0,
-        "later": 6,
-        "hidden": 13,
-        "codes": 1
-      },
-      {
-        "date": "2026-10-23",
-        "act": 2,
-        "later": 3,
-        "hidden": 9,
-        "codes": 0
-      },
-      {
-        "date": "2026-10-24",
-        "act": 0,
-        "later": 2,
-        "hidden": 5,
-        "codes": 0
-      },
-      {
-        "date": "2026-10-25",
-        "act": 0,
-        "later": 1,
-        "hidden": 4,
-        "codes": 0
-      },
-      {
-        "date": "2026-10-26",
-        "act": 3,
-        "later": 5,
-        "hidden": 16,
-        "codes": 2
-      }
-    ]
+    "codesHidden": 1
   },
   "market": {
     "holdings": [
