@@ -1009,16 +1009,16 @@
   :root[data-water="light"] { --pond: #e9e4da; }
   :root:is([data-water="pond"], [data-water="black"]) :is(#stage, #intro) { --ink: #ebe6dc; --accent: #e8784f; --koi-light: #ece6da; --koi-dark: #3a3632; color-scheme: dark; }
   :root[data-water="light"] :is(#stage, #intro) { --ink: #1c1a17; --accent: #9e3214; --koi-light: #f7f2e8; --koi-dark: #2b2723; color-scheme: light; }
-  /* The water panel, after shawn.'s "interactions on the toolbar" (designeer.xyz/finds/zzzzshawn-2110676622290624760):
-     a rounded panel whose big tile is a rounded square filled by a dithered colour ball, beside a grid of smaller rounded
-     squares. Here the ball is the water in use, drawn in cells like the pond; the grid holds the three waters, each
-     square filled with its colour, and a tile that feeds the koi. The panel is the nav's liquid glass, with no words.
-     It shows only when T is pressed (T moves to the next water, as in ASCII Koi), in the lower left corner of the pond
-     on screen (under the nav when no pond is in view), stays while it is pointed at or holds the focus, and fades out
-     a few seconds after. Radii step in by the padding: the panel 16px, a tile 10px (the big one) or 8px. */
+  /* ===== Trial v14 (water): the water picker after sucodee's "Code input component" (designeer.xyz/finds/
+     sucodeee-2111152947077742891, bluma.design): a capsule holding a row of rounded-square cells, and an outlined
+     ring that slides from cell to cell, stretching as it goes. Here there are three cells, one per water, each
+     filled with its colour; the ring stands round the water in use. The capsule is the nav's liquid glass, with no
+     words. It shows only when T is pressed (T moves to the next water, as in ASCII Koi), in the lower left corner of
+     the pond on screen (under the nav when no pond is in view), stays while it is pointed at or holds the focus, and
+     fades out a few seconds after. ===== */
   .pond-water {
-    position: absolute; left: 8px; bottom: 8px; z-index: 22; display: grid; grid-template-columns: auto auto; gap: 6px; padding: 6px;
-    border-radius: 16px; background: color-mix(in srgb, var(--bg) 62%, transparent);
+    position: absolute; left: 8px; bottom: 8px; z-index: 22; display: flex; align-items: center; gap: 6px; padding: 5px;
+    border-radius: 999px; background: color-mix(in srgb, var(--bg) 62%, transparent);
     -webkit-backdrop-filter: blur(14px) saturate(150%); backdrop-filter: blur(14px) saturate(150%);
     box-shadow: inset 0 0 16px -6px var(--glass-glow), 0 10px 28px -12px var(--glass-drop);
     transform: translateY(6px) scale(0.96); transform-origin: 0 100%; opacity: 0; visibility: hidden; pointer-events: none;
@@ -1027,22 +1027,28 @@
   .pond-water.float { position: fixed; left: 50%; top: var(--water-top, 64px); bottom: auto; transform: translate(-50%, -6px) scale(0.96); transform-origin: 50% 0; }
   .pond-water.on { transform: none; opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
   .pond-water.float.on { transform: translate(-50%, 0); }
-  .pw-ball { display: block; width: 70px; height: 70px; border-radius: 10px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 10%, transparent); }
-  .pw-grid { display: grid; grid-template-columns: repeat(2, 32px); grid-auto-rows: 32px; gap: 6px; }
-  .pond-water button { position: relative; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px; cursor: pointer; transition: transform 200ms var(--ease), box-shadow 200ms var(--ease); }
-  .pond-water button:hover { transform: translateY(-1px); }
+  .pond-water button {
+    position: relative; display: block; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 10px; cursor: pointer;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 20%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transition: transform 200ms var(--ease);
+  }
+  .pond-water button:hover { transform: scale(1.06); }
   .pond-water button:active { transform: scale(0.94); }
-  .pond-water button:focus-visible { outline-offset: 2px; border-radius: 8px; }
-  .pond-water [data-water-pick] { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 22%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.12); }
-  .pond-water [data-water-pick][aria-checked="true"] { box-shadow: 0 0 0 2px color-mix(in srgb, var(--bg) 80%, transparent), 0 0 0 3.5px var(--ink); }
+  .pond-water button:focus-visible { outline: none; }
+  /* the two end cells follow the capsule's round ends, as in the code input: their outer side is a half circle,
+     concentric with the capsule's (20px round, 5px in, so 15px); the middle cell stays a rounded square */
+  .pond-water button:first-child { border-radius: 15px 10px 10px 15px; }
+  .pond-water button:nth-child(3) { border-radius: 10px 15px 15px 10px; }
   .pond-water [data-water-pick="pond"] { background: #0e2a32; }
   .pond-water [data-water-pick="black"] { background: #0d1315; }
   .pond-water [data-water-pick="light"] { background: #e9e4da; }
-  /* the feed tile: glass like the panel, with three pellets in the pond's food colour */
-  .pond-water .pw-feed { background: color-mix(in srgb, var(--ink) 8%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 14%, transparent); }
-  .pond-water .pw-feed:hover { background: color-mix(in srgb, var(--ink) 14%, transparent); }
-  .pw-feed i { position: absolute; width: 6px; height: 5px; border-radius: 1px; background: #ce8e4a; box-shadow: inset 0 1.5px 0 #ecc595, 1.5px 2px 0 rgba(0, 0, 0, 0.35); }
-  .pw-feed i:nth-child(1) { left: 9px; top: 10px; } .pw-feed i:nth-child(2) { left: 17px; top: 14px; } .pw-feed i:nth-child(3) { left: 11px; top: 19px; }
+  /* the ring: 3px outside the cell, its corners 3px rounder, so the two curves run side by side (the script sets each
+     side's radius to match the cell it stands round: 18px on a capsule end, 13px elsewhere) */
+  .pw-ring {
+    position: absolute; left: 0; top: 2px; width: 36px; height: 36px; border: 2px solid var(--ink); border-radius: 13px;
+    pointer-events: none; box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg) 50%, transparent);
+  }
+  .pond-water:focus-within .pw-ring { border-color: var(--accent); }
   /* the pause button across the band wears the same glass, so it reads on every water */
   :root[data-fx~="water"] .pond-pause {
     border-radius: 999px; background: color-mix(in srgb, var(--bg) 62%, transparent);
@@ -7501,21 +7507,21 @@ function focusCandles(h, r, demo) {
 
 
 /*
- * Trial v13 (water): pond, black or light water, as in ASCII Koi (app.js). The user, 11-06: the panel is the nav's
- * liquid glass, with no words, shows only when T is pressed, for a moment, in the pond's lower left corner; then:
- * "参考 designeer.xyz 相关设计为我重新设计". So it follows shawn.'s "interactions on the toolbar"
- * (designeer.xyz/finds/zzzzshawn-2110676622290624760): a big rounded tile filled by a dithered colour ball beside a grid
- * of smaller rounded squares. Here the ball is the water in use, drawn in cells like the pond and lit from the upper
- * left; the grid holds the three waters, each square filled with its colour, and a tile that feeds the koi.
- * T moves to the next water, as T does in ASCII Koi, and the panel shows which one it is; a click on a square picks it.
- * It fades out a few seconds after the last key or click, and stays while it is pointed at or holds the focus.
- * The choice is kept in this browser when it may keep it (not inside n8n's sandbox, where it lasts the visit).
- * A new water spreads from its square: the old pond, drawn once on a canvas on top, opens in a widening ring.
+ * Trial v14 (water): pond, black or light water, as in ASCII Koi (app.js). The user, 11-06: the picker is the nav's
+ * liquid glass, with no words, shows only when T is pressed, for a moment, in the pond's lower left corner; and then,
+ * of v13's panel (a ball and four tiles): "删掉重新设计", in the form of sucodee's "Code input component"
+ * (designeer.xyz/finds/sucodeee-2111152947077742891), "只保留 3 个颜色"; and "最左和最右两边必须要是弧形的 … 贴合它的这个
+ * 边角，中间是正方形". So: a capsule of three cells, one per water, each filled with its colour, the two end cells arched
+ * to the capsule's round ends and the middle one a rounded square, and a ring round the water in use that slides to the next cell, stretching
+ * across the gap as it goes, as the code input's focus ring does. T moves to the next water, as T does in ASCII Koi, and
+ * the capsule shows which one it is; a click on a cell picks it. It fades out a few seconds after the last key or click,
+ * and stays while it is pointed at or holds the focus. The choice is kept in this browser when it may keep it (not
+ * inside n8n's sandbox, where it lasts the visit). A new water spreads from its cell: the old pond, drawn once on a
+ * canvas on top, opens in a widening ring.
  */
 (() => {
   if (!DESIGN.water) return;
   const WATERS = ["pond", "black", "light"], NAMES = { pond: "Pond water", black: "Black water", light: "Light water" };
-  const RGB = { pond: [14, 42, 50], black: [13, 19, 21], light: [233, 228, 218] };
   const KEY = "one-page-water", SHOW_MS = 2600, root = document.documentElement;
   const store = {
     get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } },
@@ -7525,72 +7531,54 @@ function focusCandles(h, r, demo) {
   if (WATERS.includes(saved)) { root.dataset.water = saved; Pond.colors(); }
   const now = () => root.dataset.water || "pond";
   const stage = document.getElementById("stage"), pond = document.getElementById("pond"), nav = document.getElementById("topnav");
-  const canFeed = DESIGN.feed && !reduce;
   const box = document.createElement("div");
   box.className = "pond-water float";
-  box.setAttribute("role", "group");
+  box.setAttribute("role", "radiogroup");
   box.setAttribute("aria-label", "Water, press T for the next");
-  box.innerHTML = `<canvas class="pw-ball" aria-hidden="true"></canvas><div class="pw-grid" role="radiogroup" aria-label="Water">`
-    + WATERS.map(w => `<button type="button" role="radio" data-water-pick="${w}" aria-label="${NAMES[w]}" title="${NAMES[w]}"></button>`).join("")
-    + (canFeed ? `<button type="button" class="pw-feed" aria-label="Feed the koi" title="Feed the koi"><i></i><i></i><i></i></button>` : "")
-    + `</div>`;
+  box.innerHTML = WATERS.map(w => `<button type="button" role="radio" data-water-pick="${w}" aria-label="${NAMES[w]}" title="${NAMES[w]}"></button>`).join("")
+    + `<span class="pw-ring" aria-hidden="true"></span>`;
   document.body.append(box);
+  const ring = box.querySelector(".pw-ring");
   const snap = document.createElement("canvas");
   snap.className = "water-snap";
   snap.setAttribute("aria-hidden", "true");
   stage.after(snap);
-  const mark = () => box.querySelectorAll("[data-water-pick]").forEach(b => b.setAttribute("aria-checked", String(b.dataset.waterPick === now())));
+  const cell = w => box.querySelector(`[data-water-pick="${w}"]`);
+  const mark = () => box.querySelectorAll("[data-water-pick]").forEach(b => {
+    const on = b.dataset.waterPick === now();
+    b.setAttribute("aria-checked", String(on));
+    b.tabIndex = on ? 0 : -1;
+  });
 
   /*
-   * The ball: the water in use as a sphere of cells, 3.5px each with a hairline gap like the pond's tiles, lit from the
-   * upper left with a soft highlight, over a faint grid of dots. Its colour eases to a new water in about half a second,
-   * and while the panel shows, the light drifts a little, as the caustic net does on the pond.
+   * The ring: 3px outside the cell of the water in use, its corners 3px rounder than the cell's, so on an end cell its
+   * outer side is a half circle too. To move, it first stretches over both cells, then lets go of the old one; while
+   * stretched, each side keeps the shape of the cell at that end.
    */
-  const ball = box.querySelector(".pw-ball"), bctx = ball.getContext("2d"), SIZE = 70;
-  let col = RGB[now()].slice(), raf = 0, last = 0, tb = 0;
-  const mix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
-  const rgbs = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
-  function drawBall() {
-    const dpr = Math.min(3, window.devicePixelRatio || 1);
-    if (ball.width !== Math.round(SIZE * dpr)) { ball.width = ball.height = Math.round(SIZE * dpr); }
-    bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    bctx.clearRect(0, 0, SIZE, SIZE);
-    const ink = [235, 230, 220], light = col[0] + col[1] + col[2] > 450;
-    /* the tile's own dot grid */
-    bctx.fillStyle = rgbs(ink, 0.08);
-    for (let y = 3.5; y < SIZE; y += 5) for (let x = 3.5; x < SIZE; x += 5) bctx.fillRect(x - 0.5, y - 0.5, 1, 1);
-    const R = 27, C = SIZE / 2, cell = 3.5, lx = -0.55 + 0.07 * Math.sin(tb * 0.7), ly = -0.62 + 0.05 * Math.cos(tb * 0.5), lz = 0.56;
-    const ln = Math.hypot(lx, ly, lz), Lx = lx / ln, Ly = ly / ln, Lz = lz / ln;
-    const deep = light ? mix(col, [0, 0, 0], 0.42) : mix(col, [0, 0, 0], 0.35), mid = light ? col : mix(col, [255, 255, 255], 0.14), lit = light ? [255, 255, 255] : mix(col, [255, 255, 255], 0.62);
-    for (let y = C - R; y < C + R; y += cell) for (let x = C - R; x < C + R; x += cell) {
-      const dx = (x + cell / 2 - C) / R, dy = (y + cell / 2 - C) / R, d2 = dx * dx + dy * dy;
-      if (d2 > 1) continue;
-      const nz = Math.sqrt(1 - d2), lam = Math.max(0, dx * Lx + dy * Ly + nz * Lz), spec = Math.pow(lam, 18);
-      let c = lam < 0.5 ? mix(deep, mid, lam * 2) : mix(mid, lit, (lam - 0.5) * 1.1);
-      c = mix(c, [255, 255, 255], spec * 0.7);
-      /* a darker rim, so the ball reads on any glass */
-      if (d2 > 0.8) c = mix(c, light ? [60, 52, 44] : [0, 0, 0], (d2 - 0.8) * 1.6);
-      bctx.fillStyle = rgbs(c);
-      bctx.fillRect(x + 0.35, y + 0.35, cell - 0.7, cell - 0.7);
+  let ringAt = null;
+  const sideL = i => i === 0 ? 18 : 13, sideR = i => i === WATERS.length - 1 ? 18 : 13;
+  const radius = (l, r) => `${l}px ${r}px ${r}px ${l}px`;
+  function placeRing(slide) {
+    const i = WATERS.indexOf(now()), b = cell(now()), x = b.offsetLeft - 3, w = b.offsetWidth + 6, to = radius(sideL(i), sideR(i));
+    ring.getAnimations().forEach(a => a.cancel());
+    if (slide && !reduce && ringAt && ringAt.i !== i) {
+      const lo = Math.min(ringAt.i, i), hi = Math.max(ringAt.i, i), left = Math.min(ringAt.x, x), span = Math.abs(x - ringAt.x) + w;
+      ring.animate([
+        { transform: `translateX(${ringAt.x}px)`, width: `${w}px`, borderRadius: ringAt.r },
+        { transform: `translateX(${left}px)`, width: `${span}px`, borderRadius: radius(sideL(lo), sideR(hi)), offset: 0.45 },
+        { transform: `translateX(${x}px)`, width: `${w}px`, borderRadius: to }
+      ], { duration: 460, easing: "cubic-bezier(0.3, 0.7, 0.2, 1)" });
     }
+    ring.style.transform = `translateX(${x}px)`;
+    ring.style.width = `${w}px`;
+    ring.style.borderRadius = to;
+    ringAt = { i, x, r: to };
   }
-  function tick(t) {
-    raf = 0;
-    if (!box.classList.contains("on")) return;
-    const dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
-    last = t; tb += dt;
-    const to = RGB[now()];
-    col = mix(col, to, Math.min(1, dt * 7));
-    drawBall();
-    if (!reduce) raf = requestAnimationFrame(tick);
-  }
-  const animate = () => { if (reduce) { col = RGB[now()].slice(); drawBall(); return; } if (!raf) { last = 0; raf = requestAnimationFrame(tick); } };
 
   /* Showing, for a moment: in the lower left corner of the pond on screen (the band, or the pond at the end), or under
      the nav when no pond is in view. */
   let hideAt = 0, held = false;
   const inView = el => { const r = el?.getBoundingClientRect(); return !!r && r.height > 0 && r.bottom > 40 && r.top < innerHeight - 40; };
-  const host = () => box.parentElement?.classList.contains("pond-slot") ? box.parentElement : null;
   function show() {
     const band = document.getElementById("slot"), foot = document.getElementById("slot-foot");
     const to = Pond.progress() > 0.98 && inView(band) ? band : Pond.progress() > 0.98 && inView(foot) ? foot : null;
@@ -7601,7 +7589,6 @@ function focusCandles(h, r, demo) {
       box.style.setProperty("--water-top", `${Math.round(r && r.height && getComputedStyle(nav).opacity !== "0" ? r.bottom + 8 : 12)}px`);
     }
     box.classList.add("on");
-    animate();
     clearTimeout(hideAt);
     if (!held) hideAt = setTimeout(hide, SHOW_MS);
   }
@@ -7631,35 +7618,27 @@ function focusCandles(h, r, demo) {
     store.set(name);
     Pond.colors();
     mark();
-    animate();
+    placeRing(true);
   }
   snap.addEventListener("transitionend", () => snap.classList.remove("show", "wipe"));
-  const centre = w => { const r = box.querySelector(`[data-water-pick="${w}"]`).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
-  /* The feed tile drops a handful into the open water of this pond, to the right of the panel. */
-  function feedHere() {
-    const h = host();
-    if (!h) return;
-    const r = h.getBoundingClientRect(), p = box.getBoundingClientRect(), x0 = Math.max(r.left + r.width * 0.3, p.right + 40);
-    Pond.feed(x0 + Math.random() * Math.max(10, r.right - 40 - x0) * 0.6, r.top + r.height * (0.35 + Math.random() * 0.3));
-  }
+  const centre = w => { const r = cell(w).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
   box.addEventListener("click", e => {
-    const b = e.target.closest("button");
+    const b = e.target.closest("[data-water-pick]");
     if (!b) return;
-    if (b.classList.contains("pw-feed")) feedHere();
-    else setWater(b.dataset.waterPick, centre(b.dataset.waterPick));
+    setWater(b.dataset.waterPick, centre(b.dataset.waterPick));
     show();
   });
   /* arrow keys move along the three waters, as in a radio group */
   box.addEventListener("keydown", e => {
     const d = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
-    if (!d || !e.target.closest("[data-water-pick]")) return;
+    if (!d) return;
     e.preventDefault();
     const w = WATERS[(WATERS.indexOf(now()) + d + 3) % 3];
     setWater(w, centre(w));
-    box.querySelector(`[data-water-pick="${w}"]`).focus();
+    cell(w).focus();
     show();
   });
-  /* T: the next water, and the panel shows which one it is. Not while typing, and not with a modifier key. */
+  /* T: the next water, and the capsule shows which one it is. Not while typing, and not with a modifier key. */
   document.addEventListener("keydown", e => {
     if ((e.key !== "t" && e.key !== "T") || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
     if (e.target.closest?.("input, textarea, select, [contenteditable]")) return;
@@ -7668,7 +7647,7 @@ function focusCandles(h, r, demo) {
     requestAnimationFrame(() => setWater(w, centre(w)));
   });
   mark();
-  drawBall();
+  placeRing(false);
 })();
 
 balance();

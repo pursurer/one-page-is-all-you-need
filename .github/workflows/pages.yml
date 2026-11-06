@@ -1,0 +1,45 @@
+# Publishes the repository to GitHub Pages on every push to main.
+# GitHub's own "deploy from a branch" build cannot retry. On 2026-11-06 its deploy step failed four times on
+# GitHub's side ("Deployment failed, try again later", or a timeout) while the site itself built fine, and each
+# failure sent a "Run failed" email. This workflow uploads the files as they are (no Jekyll step) and, if the
+# deploy fails, waits two minutes and tries once more before the run counts as failed.
+# It needs the repository's Pages source set to "GitHub Actions" (Settings > Pages > Build and deployment).
+name: Publish the demo page
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One publish at a time; a newer push waits for the one in progress instead of cancelling it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.again.outputs.page_url || steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+      - id: deploy
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+      - name: Wait before the second try
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 120
+      - id: again
+        name: Deploy again
+        if: steps.deploy.outcome == 'failure'
+        uses: actions/deploy-pages@v5
