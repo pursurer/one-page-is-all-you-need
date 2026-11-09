@@ -4,7 +4,8 @@
 # failure sent a "Run failed" email. This workflow uploads the files as they are (no Jekyll step). If a deploy
 # fails, it waits two minutes and tries again, then ten minutes and tries a last time; only a third failure
 # fails the run. An outage longer than that still fails the run, which is correct: the site was not updated.
-# To prove the retry path works, run it by hand with "rehearse_retry" on: the first try then times out at once.
+# To prove the retry path works, run it by hand with "rehearse_retry" on: the first try then asks for an
+# artifact that does not exist and fails before it creates a deployment, so the second try must publish.
 # It needs the repository's Pages source set to "GitHub Actions" (Settings > Pages > Build and deployment).
 name: Publish the demo page
 
@@ -44,8 +45,8 @@ jobs:
         uses: actions/deploy-pages@v5
         continue-on-error: true
         with:
-          # 600000 ms is the action's default and maximum; 1 ms makes the rehearsal try time out.
-          timeout: ${{ inputs.rehearse_retry && '1' || '600000' }}
+          # A short timeout cannot force a failure: the action checks it only while the deploy is still pending.
+          artifact_name: ${{ inputs.rehearse_retry && 'rehearsal-missing-artifact' || 'github-pages' }}
       - name: Wait two minutes before the second try
         if: steps.deploy.outcome == 'failure'
         run: sleep 120
