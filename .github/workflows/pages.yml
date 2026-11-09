@@ -1,8 +1,10 @@
 # Publishes the repository to GitHub Pages on every push to main.
 # GitHub's own "deploy from a branch" build cannot retry. On 2026-11-06 its deploy step failed four times on
 # GitHub's side ("Deployment failed, try again later", or a timeout) while the site itself built fine, and each
-# failure sent a "Run failed" email. This workflow uploads the files as they are (no Jekyll step) and, if the
-# deploy fails, waits two minutes and tries once more before the run counts as failed.
+# failure sent a "Run failed" email. This workflow uploads the files as they are (no Jekyll step). If a deploy
+# fails, it waits two minutes and tries again, then ten minutes and tries a last time; only a third failure
+# fails the run. An outage longer than that still fails the run, which is correct: the site was not updated.
+# To prove the retry path works, run it by hand with "rehearse_retry" on: the first try then times out at once.
 # It needs the repository's Pages source set to "GitHub Actions" (Settings > Pages > Build and deployment).
 name: Publish the demo page
 
@@ -10,6 +12,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      rehearse_retry:
+        description: Make the first deploy try fail on purpose, to check that the retry publishes the site
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -26,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.again.outputs.page_url || steps.deploy.outputs.page_url }}
+      url: ${{ steps.last.outputs.page_url || steps.again.outputs.page_url || steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/configure-pages@v6
@@ -36,10 +43,21 @@ jobs:
       - id: deploy
         uses: actions/deploy-pages@v5
         continue-on-error: true
-      - name: Wait before the second try
+        with:
+          # 600000 ms is the action's default and maximum; 1 ms makes the rehearsal try time out.
+          timeout: ${{ inputs.rehearse_retry && '1' || '600000' }}
+      - name: Wait two minutes before the second try
         if: steps.deploy.outcome == 'failure'
         run: sleep 120
       - id: again
         name: Deploy again
         if: steps.deploy.outcome == 'failure'
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+      - name: Wait ten minutes before the last try
+        if: steps.again.outcome == 'failure'
+        run: sleep 600
+      - id: last
+        name: Deploy a last time
+        if: steps.again.outcome == 'failure'
         uses: actions/deploy-pages@v5
