@@ -5,11 +5,12 @@
 **Every morning at 08:00, an n8n agent reads my seven sources and writes me one page.** Classes, inbox, AI news, a stock watchlist, deal prices and Christmas fares go in. Out comes a single page with the five things that matter today, each one traced back to where it came from. The page opens in a pond of ASCII koi, and a little black cat plays with the numbers.
 
 <p align="center">
-  <img src="media/opening.png" alt="The page opens on a full-screen pond: koi drawn in text characters swim under the title One Page, is all you need, and the date, all drawn in character cells." width="100%">
+  <a href="https://pursurer.github.io/one-page-is-all-you-need/"><img src="media/one-page.gif" alt="The page opens on a full-screen pond: koi drawn in text characters swim under the title One Page, is all you need, and the date, all drawn in character cells. The view pulls back and the page scrolls up: the pond becomes a band under the masthead. A click on the water calls the black cat, which scoops at the koi, and Today's five comes into view." width="100%"></a>
 </p>
 
 <p align="center">
   <a href="https://pursurer.github.io/one-page-is-all-you-need/"><b>▶ Open the demo page</b></a> &nbsp;·&nbsp;
+  <a href="https://pursurer.github.io/one-page-is-all-you-need/media/one-page-film.mp4">Watch the 32 s film</a> &nbsp;·&nbsp;
   <a href="#how-it-works">How it works</a> &nbsp;·&nbsp;
   <a href="#run-it-yourself">Run it yourself</a>
 </p>
