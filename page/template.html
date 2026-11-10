@@ -1067,6 +1067,35 @@
   .water-snap { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 20; pointer-events: none; opacity: 0; --wr: 0px; }
   .water-snap.show { opacity: 1; -webkit-mask: radial-gradient(circle at var(--x, 50%) var(--y, 50%), transparent var(--wr), #000 calc(var(--wr) + 28px)); mask: radial-gradient(circle at var(--x, 50%) var(--y, 50%), transparent var(--wr), #000 calc(var(--wr) + 28px)); }
   .water-snap.wipe { --wr: 160vmax; transition: --wr 1100ms cubic-bezier(0.55, 0, 0.25, 1); }
+
+  /* ===== Trial v16 (NOTES.md section 21): four small corrections found in a review of v15 at 1440, 1024 and 375.
+     Each is a switch; with all four off the page is v15. ===== */
+  /* fromRow: in the five, the source line always has its own row under the reason. In v15 a short reason shared its
+     row with the sources, pushed to the right edge (pick 2 of the sample), while every other pick had them below, left. */
+  :root[data-fx~="fromRow"] .pick-meta { display: block; }
+  :root[data-fx~="fromRow"] .pick-from { margin-top: 4px; }
+  /* toolKeep: the arrow stays with the tool it points to. On a phone v15 left "inbox classes →" at the end of one
+     line and the tool on the next. */
+  .pick-from .via { display: contents; }
+  :root[data-fx~="toolKeep"] .pick-from .via { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; }
+  :root[data-fx~="toolKeep"] .pick-from .via > :first-child { flex: none; }
+  :root[data-fx~="toolKeep"] .pick-from .via > .tool { min-width: 0; overflow-wrap: anywhere; }
+  /* refGap: the "→ pick N" link beside a market row no longer touches the figure. It is 67 px wide and had a 64 px
+     column (56 px on a phone) with an 8 px gap. Every row keeps the same column, so the figures stay in one line. */
+  :root[data-fx~="refGap"] .holds > li { grid-template-columns: minmax(0, 1fr) 68px; column-gap: 14px; }
+  :root[data-fx~="refGap"] .colhead { padding-right: 82px; }
+  @media (max-width: 720px) {
+    :root[data-fx~="refGap"] .holds > li { grid-template-columns: minmax(0, 1fr) 66px; column-gap: 11px; }
+    :root[data-fx~="refGap"] .colhead { padding-right: 77px; }
+  }
+  /* cardFoot: in a row of two, the closing note of the shorter card sits on the card's bottom edge, level with its
+     neighbour's, instead of leaving the spare height under it (Classes beside AI news: 136 px at 1440). */
+  @media (min-width: 900px) {
+    :root[data-fx~="rows"][data-fx~="cardFoot"] .board:not(.measure) .brow:is(.wn, .half) > .blk { display: flex; flex-direction: column; }
+    :root[data-fx~="rows"][data-fx~="cardFoot"] .board:not(.measure) .brow:is(.wn, .half) > .blk > .blk-body { flex: 1 1 auto; display: flex; flex-direction: column; }
+    :root[data-fx~="rows"][data-fx~="cardFoot"] .board:not(.measure) .brow:is(.wn, .half) > .blk > .blk-body > * { flex: none; }
+    :root[data-fx~="rows"][data-fx~="cardFoot"] .board:not(.measure) .brow:is(.wn, .half) > .blk > .blk-body > .foot-note:last-child { margin-top: auto; padding-top: 16px; }
+  }
 </style>
 </head>
 <body>
@@ -3365,6 +3394,10 @@ const FX = [
   ["catFloor", "The cat keeps one size and sits on real edges", true],
   ["feed", "Right-click the pond to feed the koi", true],
   ["water", "Pick the pond's water: pond, black or light", true],
+  ["fromRow", "The five: sources always on their own row", true],
+  ["toolKeep", "The arrow stays with its tool", true],
+  ["refGap", "Market pick link clear of the figure", true],
+  ["cardFoot", "A short card's closing note sits on its bottom edge", true],
   ["cardGlow", "Glow around the five (v7)", false],
   ["bandFade", "Soft ends on the pond band (v7)", false]
 ];
@@ -3891,7 +3924,7 @@ function render() {
           ${r ? `<button class="pick-title" type="button">${head}<span class="sr">, go to ${r[0]}</span></button>` : `<span class="pick-title">${head}</span>`}
           <div class="pick-meta">
             <p class="pick-why">${esc(nb(p.decision))}</p>
-            <p class="pick-from meta">${p.from.map(cite).join("")}${p.tool ? `<span aria-hidden="true">→</span><span class="tool" title="${esc(checked)}">${esc(p.tool)}</span>${found && found !== "—" ? `<span class="found"><span class="sr">${esc(CHECKED[p.tool] || `Checked with ${p.tool}`)}: </span>${esc(nb(found))}</span>` : ""}` : ""}</p>
+            <p class="pick-from meta">${p.from.map(cite).join("")}${p.tool ? `<span class="via"><span aria-hidden="true">→</span><span class="tool" title="${esc(checked)}">${esc(p.tool)}</span></span>${found && found !== "—" ? `<span class="found"><span class="sr">${esc(CHECKED[p.tool] || `Checked with ${p.tool}`)}: </span>${esc(nb(found))}</span>` : ""}` : ""}</p>
           </div>
         </div>
         ${r ? chev : ""}
