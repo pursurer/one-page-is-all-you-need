@@ -1,19 +1,20 @@
 # One Page is all you need
 
-*An [ASCII Koi](https://github.com/pursurer/ascii-koi) app: the koi pond, every morning, with the five things that matter today.*
-
 **Every morning at 08:00, an n8n agent reads my seven sources and writes me one page.** Classes, inbox, AI news, a stock watchlist, deal prices and Christmas fares go in. Out comes a single page with the five things that matter today, each one traced back to where it came from. The page opens in a pond of ASCII koi, and a little black cat plays with the numbers.
 
 <p align="center">
-  <a href="https://pursurer.github.io/one-page-is-all-you-need/"><img src="media/one-page.gif" alt="The page opens on a full-screen pond: koi drawn in text characters swim under the title One Page, is all you need, and the date, all drawn in character cells. The view pulls back and the page scrolls up: the pond becomes a band under the masthead. A click on the water calls the black cat, which scoops at the koi, and Today's five comes into view." width="100%"></a>
+  <a href="https://pursurer.github.io/one-page-is-all-you-need/"><img src="media/one-page.gif" alt="The page opens on a full-screen pond: koi drawn in text characters swim under the title One Page, is all you need, the date and the line 'your day, picked and written as one page', all drawn in character cells. The view pulls back, the navigation island appears and the pond becomes a band under the masthead; Today's five and the inbox come into view." width="100%"></a>
 </p>
 
 <p align="center">
   <a href="https://pursurer.github.io/one-page-is-all-you-need/"><b>▶ Open the demo page</b></a> &nbsp;·&nbsp;
-  <a href="https://pursurer.github.io/one-page-is-all-you-need/media/one-page-film.mp4">Watch the 32 s film</a> &nbsp;·&nbsp;
-  <a href="#how-it-works">How it works</a> &nbsp;·&nbsp;
+  <a href="#the-film">Watch the film (34 s, sound on)</a> &nbsp;·&nbsp;
   <a href="#run-it-yourself">Run it yourself</a>
 </p>
+
+<!-- family-nav:start -->
+<p align="center"><sub>Part of the <a href="#the-ascii-koi-family">ASCII Koi family</a>: <a href="https://github.com/pursurer/ascii-koi">ASCII Koi</a> · <a href="https://github.com/pursurer/codex-koi">Codex Koi</a> · <a href="https://github.com/pursurer/claude-koi-backdrop">Koi Backdrop</a> · <b>One Page</b></sub></p>
+<!-- family-nav:end -->
 
 This is my final project for the EPITA course *Automation with n8n* (2026). It is also where the [ASCII Koi](https://github.com/pursurer/ascii-koi) pond and the black cat began.
 
@@ -35,6 +36,12 @@ This is my final project for the EPITA course *Automation with n8n* (2026). It i
 | **Behind this page** | The run itself | Every source's status, the agent's tool calls, and a Rebuild button |
 
 Chinese and French texts (news titles, mail subjects, deal titles) are translated to English by one model call, which is checked line by line; a bad translation keeps the original.
+
+## The film
+
+https://github.com/user-attachments/assets/371105d6-e33e-4cae-90e4-0d6fe2991efb
+
+34 seconds, sound on, filmed on the demo page: the pond, Today's five, the cat underlining the to-do, the inbox, the market, the fares and the shop.
 
 ## How it works
 
@@ -89,13 +96,18 @@ You need Docker, Python 3, and your own accounts for the sources you want. A sou
 <!-- family:start -->
 ## The ASCII Koi family
 
-One design, and the two places it lives. Koi drawn in text characters, letters that take a koi's colours as it swims under them, a black cat in character tiles, and black water (`#0d1315` water, `#ebe6dc` ink, `#e8784f` accent).
+One design in four places: koi drawn in text characters, letters that take a koi's colours as it swims under them, a black cat in character tiles, and black water (`#0d1315` water, `#ebe6dc` ink, `#e8784f` accent). Codex Koi and Koi Backdrop run ASCII Koi's `pond.js` byte for byte; the pond and the cat began in One Page.
 
-| Project | What it is |
-|---|---|
-| [ASCII Koi](https://github.com/pursurer/ascii-koi) | **The design.** The pond itself: your new tab, under a clock made of the same characters. Its `pond.js` is the engine both apps run, byte for byte |
-| [Codex Koi](https://github.com/pursurer/codex-koi) | **In Codex.** The pond behind the Codex desktop app's new-chat page, and the black cat as your Codex pet |
-| **One Page is all you need** (this repository) | **In your morning.** A one-page briefing that an n8n agent writes every day, opening on the pond. Where the koi and the cat began |
+<table>
+<tr>
+<td width="50%" valign="top"><a href="https://github.com/pursurer/ascii-koi"><img src="https://raw.githubusercontent.com/pursurer/ascii-koi/main/media/family/ascii-koi.png" alt="ASCII Koi: koi in text characters swim around the title ASCII Koi on dark teal water" width="100%"></a><br><b><a href="https://github.com/pursurer/ascii-koi">ASCII Koi</a></b> · the design<br>The pond itself: your new tab, under a clock made of the same characters.</td>
+<td width="50%" valign="top"><a href="https://github.com/pursurer/codex-koi"><img src="https://raw.githubusercontent.com/pursurer/ascii-koi/main/media/family/codex-koi.png" alt="Codex Koi: koi swim under the heading of Codex's new-chat page in black water" width="100%"></a><br><b><a href="https://github.com/pursurer/codex-koi">Codex Koi</a></b> · in Codex<br>The pond behind the Codex desktop app's new-chat page, and the black cat as your Codex pet.</td>
+</tr>
+<tr>
+<td width="50%" valign="top"><a href="https://github.com/pursurer/claude-koi-backdrop"><img src="https://raw.githubusercontent.com/pursurer/ascii-koi/main/media/family/koi-backdrop.png" alt="Koi Backdrop: koi swim behind a chat in the Claude desktop app" width="100%"></a><br><b><a href="https://github.com/pursurer/claude-koi-backdrop">Koi Backdrop</a></b> · in Claude<br>The pond behind your conversations in the Claude desktop app, as a plugin with a <code>/koi</code> command.</td>
+<td width="50%" valign="top"><a href="https://github.com/pursurer/one-page-is-all-you-need"><img src="https://raw.githubusercontent.com/pursurer/ascii-koi/main/media/family/one-page.png" alt="One Page is all you need: the title drawn in character cells over the koi pond" width="100%"></a><br><b>One Page is all you need</b> (this repository) · in your morning<br>A one-page briefing that an n8n agent writes every day, opening on the pond. Where the koi and the cat began.</td>
+</tr>
+</table>
 
 Every repository in the family has the topic [`ascii-koi`](https://github.com/topics/ascii-koi).
 <!-- family:end -->
